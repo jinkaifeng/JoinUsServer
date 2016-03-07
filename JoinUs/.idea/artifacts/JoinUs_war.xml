@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="JoinUs:war">
+    <output-path>$PROJECT_DIR$/target</output-path>
+    <root id="archive" name="joinus.war">
+      <element id="artifact" artifact-name="JoinUs:war exploded" />
+    </root>
+  </artifact>
+</component>
