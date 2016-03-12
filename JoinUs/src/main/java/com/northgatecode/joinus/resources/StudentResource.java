@@ -1,6 +1,7 @@
 package com.northgatecode.joinus.resources;
 
 import com.northgatecode.joinus.models.Student;
+import com.northgatecode.joinus.models.StudentList;
 import com.northgatecode.joinus.services.StudentService;
 import org.omg.CORBA.portable.ApplicationException;
 
@@ -21,11 +22,19 @@ public class StudentResource {
 
     // localhost:8080/joinus/api/students?name=mike
     @GET
-    public List<Student> getAll(@QueryParam("name") String name) {
+    public Response getAll(@QueryParam("name") String name) throws Exception {
+        List<Student> students;
+
         if (name == null)
-            return  StudentService.getInstance().getAll();
+            students = StudentService.getInstance().getAll();
         else
-            return StudentService.getInstance().getByName(name);
+            students = StudentService.getInstance().getByName(name);
+
+        if (students.size() == 0) {
+            throw new Exception("我是异常");
+        }
+
+        return Response.ok(new StudentList(students)).build();
     }
 
     // localhost:8080/joinus/api/students/1
@@ -41,24 +50,21 @@ public class StudentResource {
     }
 
     @POST
-    public Student createStudent(Student student) {
-        return StudentService.getInstance().add(student);
+    public Response createStudent(Student student) {
+        StudentService.getInstance().add(student);
+        return Response.status(Response.Status.CREATED).build();
     }
 
     @PUT
-    public Student updateStudent(Student student) {
-        return StudentService.getInstance().update(student);
+    public Response updateStudent(Student student) {
+        StudentService.getInstance().update(student);
+        return Response.ok(student).build();
     }
-
-//    @PUT
-//    @Path("/{id}")
-//    public Student updateStudentById(Student student) {
-//
-//    }
 
     @DELETE
     @Path("/{id}")
-    public void deleteStudent(@PathParam("id") int id) {
+    public Response deleteStudent(@PathParam("id") int id) {
         StudentService.getInstance().delete(id);
+        return Response.ok().build();
     }
 }
