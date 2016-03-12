@@ -42,7 +42,11 @@ public class StudentService {
     }
 
     public Student get(int id) {
-        return students.get(id);
+        if (id < students.size() && id >= 0 ) {
+            return students.get(id);
+        } else {
+            return null;
+        }
     }
 
     public Student add(Student student) {

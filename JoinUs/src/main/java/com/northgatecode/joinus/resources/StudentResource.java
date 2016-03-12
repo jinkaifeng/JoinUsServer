@@ -2,11 +2,14 @@ package com.northgatecode.joinus.resources;
 
 import com.northgatecode.joinus.models.Student;
 import com.northgatecode.joinus.services.StudentService;
+import org.omg.CORBA.portable.ApplicationException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by qianliang on 10/3/2016.
@@ -28,8 +31,13 @@ public class StudentResource {
     // localhost:8080/joinus/api/students/1
     @GET
     @Path("/{id}")
-    public Student getById(@PathParam("id") int id) {
-        return StudentService.getInstance().get(id);
+    public Response getById(@PathParam("id") int id) {
+        Student student = StudentService.getInstance().get(id);
+
+        if (student == null) {
+            throw new NotFoundException("找不到您需要的学生ID");
+        }
+        return Response.ok(student).build();
     }
 
     @POST
