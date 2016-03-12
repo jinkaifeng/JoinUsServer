@@ -12,7 +12,7 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "name", length = 50)
+    @Column(name = "name", length = 50, nullable = false)
     private String name;
 
     @Column(name = "gender", length = 50)
@@ -23,8 +23,7 @@ public class Student {
 
     public Student() {}
 
-    public Student(int id, String name, String gender, int age) {
-        this.id = id;
+    public Student(String name, String gender, int age) {
         this.name = name;
         this.gender = gender;
         this.age = age;

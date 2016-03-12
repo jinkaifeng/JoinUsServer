@@ -6,6 +6,7 @@
     <persistence-unit name="com.northgatecode.joinus.jpa">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
         <properties>
+            <!--JDBC-->
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
             <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/joinus?useSSL=false&amp;useUnicode=yes&amp;characterEncoding=UTF-8" />
             <property name="javax.persistence.jdbc.user" value="joinus" />
@@ -16,10 +17,11 @@
             <property name="hibernate.format_sql" value="true" />
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL57InnoDBDialect" />
             <property name="hibernate.hbm2ddl.auto" value="create" />
+            <!--create, update, validate-->
 
             <!-- Configuring Connection Pool -->
-            <property name="hibernate.c3p0.min_size" value="5" />
-            <property name="hibernate.c3p0.max_size" value="20" />
+            <property name="hibernate.c3p0.min_size" value="1" />
+            <property name="hibernate.c3p0.max_size" value="5" />
             <property name="hibernate.c3p0.timeout" value="500" />
             <property name="hibernate.c3p0.max_statements" value="50" />
             <property name="hibernate.c3p0.idle_test_period" value="2000" />

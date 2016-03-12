@@ -15,12 +15,6 @@ public class StudentService {
 
     private StudentService() {
         students = new ArrayList<>();
-        students.add(new Student(0, "Jack", "Male", 21));
-        students.add(new Student(1, "Tom", "Male", 22));
-        students.add(new Student(2, "Mike", "Male", 23));
-        students.add(new Student(3, "Tome", "Male", 22));
-        students.add(new Student(4, "Lily", "Female", 20));
-        students.add(new Student(5, "Kate", "Female", 19));
     }
 
     public static StudentService getInstance() {
