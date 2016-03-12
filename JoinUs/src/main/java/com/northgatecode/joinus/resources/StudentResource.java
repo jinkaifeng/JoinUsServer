@@ -9,6 +9,7 @@ import org.omg.CORBA.portable.ApplicationException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -56,13 +57,14 @@ public class StudentResource {
     public Response getAll(@QueryParam("name") String name) throws Exception {
         List<Student> students;
 
-        if (name == null)
-            students = StudentService.getInstance().getAll();
-        else
-            students = StudentService.getInstance().getByName(name);
+        EntityManager entityManager = JpaHelper.getFactory().createEntityManager();
+        try {
+            TypedQuery<Student> query = entityManager.createQuery("select s from Student as s " +
+                    "where name like '%" + name + "%'", Student.class);
+            students = query.getResultList();
 
-        if (students.size() == 0) {
-            throw new Exception("我是异常");
+        } finally {
+            entityManager.close();
         }
 
         return Response.ok(new StudentList(students)).build();
@@ -89,20 +91,77 @@ public class StudentResource {
 
     @POST
     public Response createStudent(Student student) {
-        StudentService.getInstance().add(student);
-        return Response.status(Response.Status.CREATED).build();
+        Student studentToDb;
+        EntityManager entityManager = JpaHelper.getFactory().createEntityManager();
+        try {
+            studentToDb = new Student(student.getName(), student.getGender(), student.getAge());
+            entityManager.getTransaction().begin();
+            entityManager.persist(studentToDb);
+            entityManager.getTransaction().commit();
+        } catch (Exception ex) {
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            throw ex;
+        } finally {
+            entityManager.close();
+        }
+
+        return Response.ok(studentToDb).build();
     }
 
     @PUT
     public Response updateStudent(Student student) {
-        StudentService.getInstance().update(student);
-        return Response.ok(student).build();
+        Student studentFromDb;
+        EntityManager entityManager = JpaHelper.getFactory().createEntityManager();
+        try {
+            studentFromDb = entityManager.find(Student.class, student.getId());
+            if (studentFromDb == null) {
+                throw new NotFoundException("Student does't exist.");
+            }
+
+            entityManager.getTransaction().begin();
+
+            studentFromDb.setName(student.getName());
+            studentFromDb.setGender(student.getGender());
+            studentFromDb.setAge(student.getAge());
+
+            entityManager.getTransaction().commit();
+
+        } catch (Exception ex) {
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            throw ex;
+        } finally {
+            entityManager.close();
+        }
+        return Response.ok(studentFromDb).build();
     }
 
     @DELETE
     @Path("/{id}")
     public Response deleteStudent(@PathParam("id") int id) {
-        StudentService.getInstance().delete(id);
+        Student student;
+        EntityManager entityManager = JpaHelper.getFactory().createEntityManager();
+        try {
+            student = entityManager.find(Student.class, id);
+            if (student == null) {
+                throw new NotFoundException("Student does't exist.");
+            }
+
+            entityManager.getTransaction().begin();
+            entityManager.remove(student);
+            entityManager.getTransaction().commit();
+
+        } catch (Exception ex) {
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            throw ex;
+        } finally {
+            entityManager.close();
+        }
         return Response.ok().build();
     }
 }
