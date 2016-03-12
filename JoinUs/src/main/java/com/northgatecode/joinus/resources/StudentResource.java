@@ -5,6 +5,9 @@ import com.northgatecode.joinus.models.StudentList;
 import com.northgatecode.joinus.services.StudentService;
 import org.omg.CORBA.portable.ApplicationException;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -19,6 +22,29 @@ import java.util.concurrent.ExecutionException;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class StudentResource {
+
+    @GET
+    @Path("dbtest")
+    public Response dbTest() {
+        Student student = new Student(0, "Tom", "Male", 18);
+
+        EntityManagerFactory entityManagerFactory = Persistence.createEntityManagerFactory("com.northgatecode.joinus.jpa");
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
+        try {
+            entityManager.getTransaction().begin();
+            entityManager.persist(student);
+            entityManager.getTransaction().commit();
+        } catch (Exception ex) {
+            if (entityManager.getTransaction().isActive()) {
+                entityManager.getTransaction().rollback();
+            }
+            throw ex;
+        } finally {
+            entityManager.close();
+        }
+
+        return Response.ok(student).build();
+    }
 
     // localhost:8080/joinus/api/students?name=mike
     @GET

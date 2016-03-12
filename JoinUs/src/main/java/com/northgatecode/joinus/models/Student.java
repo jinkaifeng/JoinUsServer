@@ -1,12 +1,24 @@
 package com.northgatecode.joinus.models;
 
+import javax.persistence.*;
+
 /**
  * Created by qianliang on 10/3/2016.
  */
+@Entity
+@Table(name = "student")
 public class Student {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "name", length = 50)
     private String name;
+
+    @Column(name = "gender", length = 50)
     private String gender;
+
+    @Column(name = "age", length = 50)
     private int age;
 
     public Student() {}
