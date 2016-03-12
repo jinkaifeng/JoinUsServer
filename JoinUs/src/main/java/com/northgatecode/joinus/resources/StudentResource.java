@@ -1,6 +1,7 @@
 package com.northgatecode.joinus.resources;
 
 import com.northgatecode.joinus.models.Student;
+import com.northgatecode.joinus.services.StudentService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -11,41 +12,45 @@ import java.util.List;
  * Created by qianliang on 10/3/2016.
  */
 @Path("students")
+@Consumes(MediaType.APPLICATION_JSON)
+@Produces(MediaType.APPLICATION_JSON)
 public class StudentResource {
+
+    // localhost:8080/joinus/api/students?name=mike
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<Student> getAll() {
-        List<Student> students = new ArrayList<>();
-        students.add(new Student(0, "Jack", "Male", 21));
-        students.add(new Student(1, "Tom", "Male", 22));
-        students.add(new Student(2, "Mike", "Male", 23));
-        students.add(new Student(3, "Jersey", "Male", 22));
-        students.add(new Student(4, "Lily", "Female", 20));
-        students.add(new Student(5, "Kate", "Female", 19));
-        return students;
+    public List<Student> getAll(@QueryParam("name") String name) {
+        if (name == null)
+            return  StudentService.getInstance().getAll();
+        else
+            return StudentService.getInstance().getByName(name);
+    }
+
+    // localhost:8080/joinus/api/students/1
+    @GET
+    @Path("/{id}")
+    public Student getById(@PathParam("id") int id) {
+        return StudentService.getInstance().get(id);
     }
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     public Student createStudent(Student student) {
-
-        System.out.println("Save data...");
-        return student;
+        return StudentService.getInstance().add(student);
     }
 
-    @GET
-    @Path("tom")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Student getTom() {
+    @PUT
+    public Student updateStudent(Student student) {
+        return StudentService.getInstance().update(student);
+    }
 
-        Student student = new Student();
+//    @PUT
+//    @Path("/{id}")
+//    public Student updateStudentById(Student student) {
+//
+//    }
 
-        student.setId(1);
-        student.setName("Tom");
-        student.setGender("Male");
-        student.setAge(22);
-
-        return student;
+    @DELETE
+    @Path("/{id}")
+    public void deleteStudent(@PathParam("id") int id) {
+        StudentService.getInstance().delete(id);
     }
 }
