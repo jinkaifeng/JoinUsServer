@@ -21,12 +21,23 @@ public class Student {
     @Column(name = "age", length = 50)
     private int age;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "team_id")
+    private Team team;
+
     public Student() {}
 
     public Student(String name, String gender, int age) {
         this.name = name;
         this.gender = gender;
         this.age = age;
+    }
+
+    public Student(String name, String gender, int age, Team team) {
+        this.name = name;
+        this.gender = gender;
+        this.age = age;
+        this.team = team;
     }
 
     public int getAge() {
@@ -59,5 +70,13 @@ public class Student {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
     }
 }

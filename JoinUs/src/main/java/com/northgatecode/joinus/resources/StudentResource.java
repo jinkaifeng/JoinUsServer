@@ -2,6 +2,7 @@ package com.northgatecode.joinus.resources;
 
 import com.northgatecode.joinus.models.Student;
 import com.northgatecode.joinus.models.StudentList;
+import com.northgatecode.joinus.models.Team;
 import com.northgatecode.joinus.services.StudentService;
 import com.northgatecode.joinus.utils.JpaHelper;
 import org.omg.CORBA.portable.ApplicationException;
@@ -32,12 +33,17 @@ public class StudentResource {
         EntityManager entityManager = JpaHelper.getFactory().createEntityManager();
         try {
             entityManager.getTransaction().begin();
-            entityManager.persist(new Student("Jack", "Male", 21));
-            entityManager.persist(new Student("Tom", "Male", 22));
-            entityManager.persist(new Student("Mike", "Male", 23));
-            entityManager.persist(new Student("Tome", "Male", 22));
-            entityManager.persist(new Student("Lily", "Female", 20));
-            entityManager.persist(new Student("Kate", "Female", 19));
+            Team team1 = new Team("Team 1");
+            entityManager.persist(team1);
+            Team team2 = new Team("Team 2");
+            entityManager.persist(team2);
+
+            entityManager.persist(new Student("Jack", "Male", 21, team1));
+            entityManager.persist(new Student("Tom", "Male", 22, team1));
+            entityManager.persist(new Student("Mike", "Male", 23, team1));
+            entityManager.persist(new Student("Tome", "Male", 22, team2));
+            entityManager.persist(new Student("Lily", "Female", 20, team2));
+            entityManager.persist(new Student("Kate", "Female", 19, team2));
             entityManager.getTransaction().commit();
 
         } catch (Exception ex) {
@@ -55,11 +61,13 @@ public class StudentResource {
     // localhost:8080/joinus/api/students?name=mike
     @GET
     public Response getAll(@QueryParam("name") String name) throws Exception {
+        if (name == null || name.length() == 0) {
+            throw new BadRequestException("Parameter name can't be empty");
+        }
         List<Student> students;
-
         EntityManager entityManager = JpaHelper.getFactory().createEntityManager();
         try {
-            TypedQuery<Student> query = entityManager.createQuery("select s from Student as s " +
+            TypedQuery<Student> query = entityManager.createQuery("select stu from Student as stu " +
                     "where name like '%" + name + "%'", Student.class);
             students = query.getResultList();
 
