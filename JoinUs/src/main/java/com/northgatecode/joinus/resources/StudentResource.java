@@ -37,6 +37,13 @@ public class StudentResource {
             entityManager.persist(team1);
             Team team2 = new Team("Team 2");
             entityManager.persist(team2);
+            Team team3 = new Team("Team 3");
+            entityManager.persist(team3);
+            Team team4 = new Team("Team 4");
+            entityManager.persist(team4);
+            Team team5 = new Team("Team 5");
+            entityManager.persist(team5);
+
 
             entityManager.persist(new Student("Jack", "Male", 21, team1));
             entityManager.persist(new Student("Tom", "Male", 22, team1));
@@ -61,14 +68,16 @@ public class StudentResource {
     // localhost:8080/joinus/api/students?name=mike
     @GET
     public Response getAll(@QueryParam("name") String name) throws Exception {
-        if (name == null || name.length() == 0) {
-            throw new BadRequestException("Parameter name can't be empty");
-        }
         List<Student> students;
         EntityManager entityManager = JpaHelper.getFactory().createEntityManager();
         try {
-            TypedQuery<Student> query = entityManager.createQuery("select stu from Student as stu " +
-                    "where name like '%" + name + "%'", Student.class);
+            TypedQuery<Student> query;
+            if (name == null || name.length() == 0) {
+                query = entityManager.createQuery("select s from Student as s", Student.class);
+            } else {
+                query = entityManager.createQuery("select s from Student as s" +
+                        " where name like '%" + name + "%'", Student.class);
+            }
             students = query.getResultList();
 
         } finally {
@@ -90,9 +99,8 @@ public class StudentResource {
             entityManager.close();
         }
 
-
         if (student == null) {
-            throw new NotFoundException("找不到您需要的学生ID");
+            throw new NotFoundException("此ID不存在");
         }
         return Response.ok(student).build();
     }
