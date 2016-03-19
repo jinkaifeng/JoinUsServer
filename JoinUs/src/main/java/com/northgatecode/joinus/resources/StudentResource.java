@@ -1,22 +1,16 @@
 package com.northgatecode.joinus.resources;
 
-import com.northgatecode.joinus.models.Student;
-import com.northgatecode.joinus.models.StudentList;
-import com.northgatecode.joinus.models.Team;
-import com.northgatecode.joinus.services.StudentService;
+import com.northgatecode.joinus.dao.Student;
+import com.northgatecode.joinus.dto.StudentList;
+import com.northgatecode.joinus.dao.Team;
 import com.northgatecode.joinus.utils.JpaHelper;
-import org.omg.CORBA.portable.ApplicationException;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by qianliang on 10/3/2016.

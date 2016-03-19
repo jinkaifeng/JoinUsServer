@@ -10,12 +10,12 @@
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
             <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/joinus?useSSL=false&amp;useUnicode=yes&amp;characterEncoding=UTF-8" />
             <property name="javax.persistence.jdbc.user" value="joinus" />
-            <property name="javax.persistence.jdbc.password" value="joinus" />
+            <property name="javax.persistence.jdbc.password" value="joinUS123" />
 
             <!-- Hibernate properties -->
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.format_sql" value="true" />
-            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL57InnoDBDialect" />
+            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
             <property name="hibernate.hbm2ddl.auto" value="create" />
             <!--create, update, validate-->
 

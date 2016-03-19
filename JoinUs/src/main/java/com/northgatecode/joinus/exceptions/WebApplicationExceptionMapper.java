@@ -1,6 +1,6 @@
 package com.northgatecode.joinus.exceptions;
 
-import com.northgatecode.joinus.models.Message;
+import com.northgatecode.joinus.dto.Message;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;

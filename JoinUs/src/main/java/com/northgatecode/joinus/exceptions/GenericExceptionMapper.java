@@ -1,10 +1,9 @@
 package com.northgatecode.joinus.exceptions;
 
-import com.northgatecode.joinus.models.Message;
+import com.northgatecode.joinus.dto.Message;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
 
 /**
  * Created by qianliang on 12/3/2016.
