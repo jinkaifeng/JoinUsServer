@@ -12,25 +12,25 @@ import javax.ws.rs.core.SecurityContext;
  */
 @Path("test")
 public class TestController {
-    @Path("/hello")
+    @Path("hello")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String hello() {
         return "Hello, Jersey is working.";
     }
 
-    @Path("/query")
+    @Path("query")
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String query(@QueryParam("name") String name) {
-        return "Query String " + name;
+        return "Query String: name=" + name;
     }
 
     @GET
     @Path("auth")
     @Authenticated
+    @Produces(MediaType.TEXT_PLAIN)
     public String auth(@Context SecurityContext sc) {
-
-        return sc.getUserPrincipal().getName();
+        return "User Name:" + sc.getUserPrincipal().getName();
     }
 }

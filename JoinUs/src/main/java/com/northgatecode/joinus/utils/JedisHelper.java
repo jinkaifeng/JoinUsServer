@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder;
 import redis.clients.jedis.*;
 
 /**
- * Created by qianliang on 19/3/2016.
+ * Created by qianliang on 24/2/2016.
  */
 public class JedisHelper {
     private static final JedisHelper jedisHelper;
@@ -46,7 +46,7 @@ public class JedisHelper {
 
     public static <T> T get(String key, Class<T> classOfT) {
         try (Jedis jedis = getResource()) {
-            return getGson().fromJson(jedis.get(key), classOfT);
+                return getGson().fromJson(jedis.get(key), classOfT);
         }
     }
 
@@ -77,3 +77,4 @@ public class JedisHelper {
     }
 
 }
+
