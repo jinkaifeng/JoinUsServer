@@ -88,6 +88,8 @@ public class RegisterController {
             user.setCreateDate(new Date());
             user.setLastUpdateDate(new Date());
 
+            user.setLocked(false);
+
             entityManager.getTransaction().begin();
             entityManager.persist(user);
             entityManager.getTransaction().commit();

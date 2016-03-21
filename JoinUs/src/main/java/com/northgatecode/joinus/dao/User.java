@@ -20,7 +20,7 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private List<Role> roles;
 
-    @Column(name = "mobile", length = 20, nullable = false)
+    @Column(name = "mobile", length = 20, nullable = false, unique = true)
     private String mobile;
 
     @Column(name = "email", length = 20)
@@ -51,6 +51,9 @@ public class User {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "city_id")
     private City city;
+
+    @Column(name = "is_locked")
+    private Boolean isLocked;
 
     @Column(name = "last_update_date")
     private Date lastUpdateDate;
@@ -152,6 +155,14 @@ public class User {
 
     public void setCity(City city) {
         this.city = city;
+    }
+
+    public Boolean getLocked() {
+        return isLocked;
+    }
+
+    public void setLocked(Boolean locked) {
+        isLocked = locked;
     }
 
     public Date getLastUpdateDate() {

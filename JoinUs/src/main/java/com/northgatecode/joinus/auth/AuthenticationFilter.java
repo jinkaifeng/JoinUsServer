@@ -33,6 +33,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
                 || !containerRequestContext.getHeaders().containsKey("security-token")) {
             throw new NotAuthorizedException("user-id or security-token is required for authentication  ", Response.noContent());
         }
+
         String userId = containerRequestContext.getHeaderString("user-id");
         String token = containerRequestContext.getHeaderString("security-token");
         if (userId == null || userId.length() == 0 || token == null || token.length() == 0) {
@@ -40,6 +41,14 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         }
 
         User user = UserService.getById(Integer.parseInt(userId));
+
+        if (user == null) {
+            throw new NotAuthorizedException("user-id doesn't exist", Response.noContent());
+        }
+
+        if (user.getLocked()) {
+            throw new NotAuthorizedException("account is locked", Response.noContent());
+        }
 
         if (user.getTokenExpDate().compareTo(new Date()) < 0 || !user.getToken().equals(token)) {
             throw new NotAuthorizedException("security-token is expired or invalid", Response.noContent());
