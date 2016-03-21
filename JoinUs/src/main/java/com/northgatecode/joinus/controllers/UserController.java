@@ -29,9 +29,9 @@ public class UserController {
     private Logger logger = Logger.getLogger(this.getClass().getName());
 
     @GET
-    @Path("my-profile")
+    @Path("myProfile")
     @Authenticated
-    public Response myProfile(@Context SecurityContext securityContext) {
+    public Response getMyProfile(@Context SecurityContext securityContext) {
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
         int userId = userPrincipal.getId();
         User user = UserService.getById(userId);
@@ -50,12 +50,12 @@ public class UserController {
         try {
             user = entityManager.find(User.class, userId);
 
-            if (user.getPassword() != null && UserService.verifyPassword(user, userPassword.getOldPassword()))
+            if (user.getPassword() != null && !UserService.verifyPassword(user, userPassword.getOldPassword()))
             {
                 throw new BadRequestException("原密码错误");
             }
             // validate password
-            if (userPassword.getNewPassword().length() < 4) {
+            if (userPassword.getNewPassword().length() < 6) {
                 throw new BadRequestException("无效的新密码");
             }
 
@@ -75,7 +75,7 @@ public class UserController {
         } finally {
             entityManager.close();
         }
-        UserService.reloadById(userId);
+        UserService.cacheData(user);
         return Response.ok().build();
     }
 }

@@ -45,11 +45,12 @@ public class User {
     private String photo;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "gender_id")
+    private Gender gender;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "city_id")
     private City city;
-
-    @Column(name = "accept_notification")
-    private Boolean acceptNotification;
 
     @Column(name = "last_update_date")
     private Date lastUpdateDate;
@@ -137,20 +138,20 @@ public class User {
         this.photo = photo;
     }
 
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
     public City getCity() {
         return city;
     }
 
     public void setCity(City city) {
         this.city = city;
-    }
-
-    public Boolean getAcceptNotification() {
-        return acceptNotification;
-    }
-
-    public void setAcceptNotification(Boolean acceptNotification) {
-        this.acceptNotification = acceptNotification;
     }
 
     public Date getLastUpdateDate() {

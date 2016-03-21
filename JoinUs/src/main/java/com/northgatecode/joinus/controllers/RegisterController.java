@@ -1,5 +1,7 @@
 package com.northgatecode.joinus.controllers;
 
+import com.northgatecode.joinus.dao.Gender;
+import com.northgatecode.joinus.dao.Role;
 import com.northgatecode.joinus.dao.User;
 import com.northgatecode.joinus.dto.*;
 import com.northgatecode.joinus.services.UserService;
@@ -13,6 +15,7 @@ import javax.persistence.TypedQuery;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -73,7 +76,14 @@ public class RegisterController {
             user.setMobile(mobileVerifyCode.getMobile());
             user.setName("用户" + RandomStringUtils.randomNumeric(6));
 
-            UserService.refreshToken(user);
+            Role registeredRole = entityManager.find(Role.class, 2);
+            user.setRoles(new ArrayList<Role>());
+            user.getRoles().add(registeredRole);
+
+            Gender unknownGender = entityManager.find(Gender.class, 1);
+            user.setGender(unknownGender);
+
+            UserService.generateToken(user);
 
             user.setCreateDate(new Date());
             user.setLastUpdateDate(new Date());

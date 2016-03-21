@@ -40,12 +40,13 @@ public class LoginController {
     }
 
     @POST
-    @Path("verify-code")
+    @Path("verifyCode")
     public Response verifyCode (MobileVerifyCode mobileVerifyCode) {
         if (!VerifyCodeService.verify(mobileVerifyCode.getMobile(), mobileVerifyCode.getVerifyCode())) {
             throw new BadRequestException("验证码错误");
         }
         User user = UserService.getByMobile(mobileVerifyCode.getMobile());
+        UserService.refreshToken(user);
         return Response.ok(new UserProfileWithToken(new UserProfile(user), new UserToken(user))).build();
     }
 
@@ -54,12 +55,17 @@ public class LoginController {
     public Response password (MobilePassword mobilePassword) {
         User user = UserService.getByMobile(mobilePassword.getMobile());
         if (user == null) {
-            new BadRequestException("手机号码或者密码错误");
+            throw new BadRequestException("此号码还没有注册,请先注册");
         }
-        String hashedPassword = DigestUtils.md5Hex(mobilePassword.getPassword() + user.getSalt());
-        if (!hashedPassword.equals(user.getPassword())) {
-            new BadRequestException("手机号码或者密码错误");
+
+        if (user.getPassword() == null || user.getPassword().length() == 0) {
+            throw new BadRequestException("您还没有设置密码");
         }
+
+        if (!UserService.verifyPassword(user, mobilePassword.getPassword())) {
+            throw new BadRequestException("密码错误");
+        }
+        UserService.refreshToken(user);
         return Response.ok(new UserProfileWithToken(new UserProfile(user), new UserToken(user))).build();
     }
 }

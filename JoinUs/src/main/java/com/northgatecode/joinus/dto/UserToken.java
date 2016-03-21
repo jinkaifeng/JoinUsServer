@@ -8,39 +8,39 @@ import java.util.Date;
  * Created by qianliang on 3/3/2016.
  */
 public class UserToken {
-    private int id;
-    private String token;
-    private Date tokenExpDate;
+    private int userId;
+    private String securityToken;
+    private Date experiationDate;
 
     public UserToken() {}
 
     public UserToken(User user) {
-        this.id = user.getId();
-        this.token = user.getToken();
-        this.tokenExpDate = user.getTokenExpDate();
+        this.userId = user.getId();
+        this.securityToken = user.getToken();
+        this.experiationDate = user.getTokenExpDate();
     }
 
-    public int getId() {
-        return id;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
-    public String getToken() {
-        return token;
+    public String getSecurityToken() {
+        return securityToken;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setSecurityToken(String securityToken) {
+        this.securityToken = securityToken;
     }
 
-    public Date getTokenExpDate() {
-        return tokenExpDate;
+    public Date getExperiationDate() {
+        return experiationDate;
     }
 
-    public void setTokenExpDate(Date tokenExpDate) {
-        this.tokenExpDate = tokenExpDate;
+    public void setExperiationDate(Date experiationDate) {
+        this.experiationDate = experiationDate;
     }
 }

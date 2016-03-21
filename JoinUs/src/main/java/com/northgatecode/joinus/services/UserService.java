@@ -100,9 +100,28 @@ public class UserService {
 
     public static void refreshToken(User user) {
         if (user != null && (user.getTokenExpDate() == null || user.getTokenExpDate().compareTo(new Date()) < 0)) {
-            user.setToken(RandomStringUtils.randomAlphanumeric(64));
-            user.setTokenExpDate(DateUtils.addMinutes(new Date(), 30)); // expire after 30 minutes
+            User userFromDB;
+            EntityManager entityManager = JpaHelper.getFactory().createEntityManager();
+            try {
+                userFromDB = entityManager.find(User.class, user.getId());
+                entityManager.getTransaction().begin();
+                generateToken(userFromDB);
+                entityManager.getTransaction().commit();
+            } catch (Exception ex) {
+                if (entityManager.getTransaction().isActive())
+                    entityManager.getTransaction().rollback();
+                throw ex;
+            } finally {
+                entityManager.close();
+            }
+
+            cacheData(userFromDB);
         }
+    }
+
+    public static void generateToken(User user) {
+        user.setToken(RandomStringUtils.randomAlphanumeric(64));
+        user.setTokenExpDate(DateUtils.addDays(new Date(), 7));
     }
 
     public static Boolean verifyPassword(User user, String password) {
@@ -113,7 +132,7 @@ public class UserService {
         return false;
     }
 
-    private static void cacheData(User user) {
+    public static void cacheData(User user) {
         String key = getKey(user.getId());
         String mobileKey = getMobileKey(user.getMobile());
 

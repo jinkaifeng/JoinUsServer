@@ -1,9 +1,12 @@
 package com.northgatecode.joinus.dto;
 
 import com.northgatecode.joinus.dao.City;
+import com.northgatecode.joinus.dao.Gender;
+import com.northgatecode.joinus.dao.Role;
 import com.northgatecode.joinus.dao.User;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by qianliang on 3/3/2016.
@@ -14,9 +17,10 @@ public class UserProfile {
     private String email;
     private String name;
     private String photo;
+    private Gender gender;
     private City city;
-    private Boolean acceptNotification;
     private Date lastUpdateDate;
+    private List<Role> roles;
 
     public UserProfile() {}
 
@@ -27,8 +31,9 @@ public class UserProfile {
         this.name = user.getName();
         this.photo = user.getPhoto();
         this.city = user.getCity();
-        this.acceptNotification = user.getAcceptNotification();
+        this.gender = user.getGender();
         this.lastUpdateDate = user.getLastUpdateDate();
+        this.roles = user.getRoles();
     }
 
     public int getId() {
@@ -71,6 +76,14 @@ public class UserProfile {
         this.photo = photo;
     }
 
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
     public City getCity() {
         return city;
     }
@@ -79,19 +92,19 @@ public class UserProfile {
         this.city = city;
     }
 
-    public Boolean getAcceptNotification() {
-        return acceptNotification;
-    }
-
-    public void setAcceptNotification(Boolean acceptNotification) {
-        this.acceptNotification = acceptNotification;
-    }
-
     public Date getLastUpdateDate() {
         return lastUpdateDate;
     }
 
     public void setLastUpdateDate(Date lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
+    }
+
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
     }
 }

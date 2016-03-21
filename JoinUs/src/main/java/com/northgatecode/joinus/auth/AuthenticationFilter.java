@@ -31,26 +31,26 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
         if (!containerRequestContext.getHeaders().containsKey("user-id")
                 || !containerRequestContext.getHeaders().containsKey("security-token")) {
-            throw new NotAuthorizedException("invalid user-id or security-token", Response.noContent());
+            throw new NotAuthorizedException("user-id or security-token is required for authentication  ", Response.noContent());
         }
         String userId = containerRequestContext.getHeaderString("user-id");
         String token = containerRequestContext.getHeaderString("security-token");
         if (userId == null || userId.length() == 0 || token == null || token.length() == 0) {
-            throw new NotAuthorizedException("invalid user-id or security-token", Response.noContent());
+            throw new NotAuthorizedException("value of user-id or security-token can't be null", Response.noContent());
         }
 
         User user = UserService.getById(Integer.parseInt(userId));
 
         if (user.getTokenExpDate().compareTo(new Date()) < 0 || !user.getToken().equals(token)) {
-            throw new NotAuthorizedException("invalid user-id or security-token", Response.noContent());
+            throw new NotAuthorizedException("security-token is expired or invalid", Response.noContent());
         }
 
         UserPrincipal userPrincipal = new UserPrincipal();
         userPrincipal.setId(user.getId());
         userPrincipal.setName(user.getName());
-        
+
         for (Role role : user.getRoles()) {
-            userPrincipal.addRole(role.getName());
+            userPrincipal.addRole(Integer.toString(role.getId()));
         }
 
         RoleBasedSecurityContext securityContext = new RoleBasedSecurityContext(userPrincipal);
