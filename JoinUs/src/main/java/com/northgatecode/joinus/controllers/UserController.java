@@ -2,13 +2,16 @@ package com.northgatecode.joinus.controllers;
 
 import com.northgatecode.joinus.auth.Authenticated;
 import com.northgatecode.joinus.auth.UserPrincipal;
-import com.northgatecode.joinus.dao.User;
 import com.northgatecode.joinus.dto.UserPassword;
 import com.northgatecode.joinus.dto.UserProfile;
+import com.northgatecode.joinus.mongodb.User;
 import com.northgatecode.joinus.services.UserService;
 import com.northgatecode.joinus.utils.JpaHelper;
+import com.northgatecode.joinus.utils.MorphiaHelper;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.Datastore;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.*;
@@ -16,6 +19,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import javax.xml.crypto.Data;
 import java.util.Date;
 import java.util.logging.Logger;
 
@@ -33,7 +37,7 @@ public class UserController {
     @Authenticated
     public Response getMyProfile(@Context SecurityContext securityContext) {
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
-        int userId = userPrincipal.getId();
+        ObjectId userId = userPrincipal.getId();
         User user = UserService.getById(userId);
         return Response.ok(new UserProfile(user)).build();
     }
@@ -43,39 +47,30 @@ public class UserController {
     @Authenticated
     public Response updatePassword(@Context SecurityContext securityContext, UserPassword userPassword) {
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
-        int userId = userPrincipal.getId();
+        ObjectId userId = userPrincipal.getId();
 
-        User user;
-        EntityManager entityManager = JpaHelper.getFactory().createEntityManager();
-        try {
-            user = entityManager.find(User.class, userId);
+        Datastore datastore = MorphiaHelper.getDatastore();
 
-            if (user.getPassword() != null && !UserService.verifyPassword(user, userPassword.getOldPassword()))
-            {
-                throw new BadRequestException("原密码错误");
-            }
-            // validate password
-            if (userPassword.getNewPassword().length() < 6) {
-                throw new BadRequestException("无效的新密码");
-            }
+        User user = datastore.find(User.class).field("id").equal(userId).get();
 
-            String salt = RandomStringUtils.randomAlphanumeric(4);
-            String hashedPassword = DigestUtils.md5Hex(userPassword.getNewPassword() + salt);
-
-            entityManager.getTransaction().begin();
-            user.setPassword(hashedPassword);
-            user.setSalt(salt);
-            user.setLastUpdateDate(new Date());
-            entityManager.getTransaction().commit();
-        } catch (Exception ex) {
-            if (entityManager.getTransaction().isActive()) {
-                entityManager.getTransaction().rollback();
-            }
-            throw ex;
-        } finally {
-            entityManager.close();
+        if (user.getPassword() != null && !UserService.verifyPassword(user, userPassword.getOldPassword())) {
+            throw new BadRequestException("原密码错误");
         }
-        UserService.cacheData(user);
+        // validate password
+        if (userPassword.getNewPassword().length() < 6) {
+            throw new BadRequestException("无效的新密码");
+        }
+
+        String salt = RandomStringUtils.randomAlphanumeric(4);
+        String hashedPassword = DigestUtils.md5Hex(userPassword.getNewPassword() + salt);
+
+        user.setPassword(hashedPassword);
+        user.setSalt(salt);
+        user.setLastUpdateDate(new Date());
+
+        datastore.save(user);
+
+
         return Response.ok().build();
     }
 }

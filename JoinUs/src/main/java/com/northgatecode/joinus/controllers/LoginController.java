@@ -1,17 +1,18 @@
 package com.northgatecode.joinus.controllers;
 
-import com.northgatecode.joinus.dao.User;
 import com.northgatecode.joinus.dto.*;
+import com.northgatecode.joinus.mongodb.User;
 import com.northgatecode.joinus.services.UserService;
 import com.northgatecode.joinus.services.VerifyCodeService;
 import com.northgatecode.joinus.utils.JpaHelper;
-import org.apache.commons.codec.digest.DigestUtils;
+import com.northgatecode.joinus.utils.MorphiaHelper;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * Created by qianliang on 2/3/2016.
@@ -23,18 +24,14 @@ public class LoginController {
     @GET
     @Path("{mobile}")
     public Response getVerifyCode(@PathParam("mobile") String mobile) {
-        EntityManager entityManager = JpaHelper.getFactory().createEntityManager();
-        try {
 
-            TypedQuery<Long> query = entityManager.createQuery("select count(u) from User as u where u.mobile like '" + mobile + "'", Long.class);
-            long count = query.getSingleResult();
+        List<User> existingUsers = MorphiaHelper.getDatastore().createQuery(User.class)
+                .field("mobile").equal(mobile).asList();
 
-            if (count == 0) {
+            if (existingUsers.size() == 0) {
                 throw new BadRequestException("此号码还没有注册, 请注册.");
             }
-        } finally {
-            entityManager.close();
-        }
+
         VerifyCodeService.generateCodeAndSendSMS(mobile);
         return Response.ok(new Message("验证码已发送, 有效期5分钟.")).build();
     }

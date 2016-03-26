@@ -1,9 +1,10 @@
 package com.northgatecode.joinus.dto;
 
-import com.northgatecode.joinus.dao.City;
-import com.northgatecode.joinus.dao.Gender;
-import com.northgatecode.joinus.dao.Role;
-import com.northgatecode.joinus.dao.User;
+import com.northgatecode.joinus.mongodb.City;
+import com.northgatecode.joinus.mongodb.Gender;
+import com.northgatecode.joinus.mongodb.Role;
+import com.northgatecode.joinus.mongodb.User;
+import org.bson.types.ObjectId;
 
 import java.util.Date;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
  * Created by qianliang on 3/3/2016.
  */
 public class UserProfile {
-    private int id;
+    private ObjectId id;
     private String mobile;
     private String email;
     private String name;
@@ -36,11 +37,11 @@ public class UserProfile {
         this.roles = user.getRoles();
     }
 
-    public int getId() {
+    public ObjectId getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(ObjectId id) {
         this.id = id;
     }
 

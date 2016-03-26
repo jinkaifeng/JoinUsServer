@@ -1,8 +1,5 @@
 package com.northgatecode.joinus.controllers;
 
-import com.northgatecode.joinus.dao.Province;
-import com.northgatecode.joinus.services.ProvinceService;
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -21,12 +18,6 @@ public class ProvinceController {
     @Path("{provinceId}")
     public Response getProvince(@PathParam("provinceId") int provinceId) {
 
-        Province province = ProvinceService.getById(provinceId);
-
-        if (province != null) {
-            return Response.ok(province).build();
-        } else {
-            throw new NotFoundException();
-        }
+        return Response.ok().build();
     }
 }

@@ -19,7 +19,11 @@ public class RoleBasedSecurityContext implements SecurityContext {
     @Override
     public boolean isUserInRole(String s) {
         if (user.getRoles() != null) {
-            return user.getRoles().contains(s);
+            for (String role : user.getRoles()) {
+                if (role.equals(s)) {
+                    return true;
+                }
+            }
         }
         return false;
     }

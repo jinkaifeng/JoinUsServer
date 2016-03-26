@@ -19,6 +19,7 @@ import javax.ws.rs.ext.Provider;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.bson.types.ObjectId;
 
 /**
  * Created by qianliang on 19/3/2016.
@@ -36,6 +37,7 @@ public final class GsonMessageBodyHandler implements MessageBodyWriter<Object>, 
             final GsonBuilder gsonBuilder = new GsonBuilder();
             gson = gsonBuilder
 //                    .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
+                    .registerTypeAdapter(ObjectId.class, new ObjectIdTypeAdapter())
                     .setPrettyPrinting()
                     .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
                     .serializeNulls()

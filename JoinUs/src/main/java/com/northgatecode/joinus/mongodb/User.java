@@ -1,71 +1,43 @@
-package com.northgatecode.joinus.dao;
+package com.northgatecode.joinus.mongodb;
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.*;
 
-import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
 /**
- * Created by qianliang on 20/2/2016.
+ * Created by qianliang on 25/3/2016.
  */
-@Entity
-@Table(name = "user", indexes = {@Index(columnList = "mobile", unique = true)})
+@Entity(noClassnameStored = true)
+@Indexes(
+        @Index(value = "mobile", fields = @Field("mobile"), unique = true)
+)
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "user_role",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private ObjectId id;
+    @Reference
     private List<Role> roles;
-
-    @Column(name = "mobile", length = 20, nullable = false, unique = true)
     private String mobile;
-
-    @Column(name = "email", length = 20)
     private String email;
-
-    @Column(name = "password", length = 32)
     private String password;
-
-    @Column(name = "salt", length = 4)
     private String salt;
-
-    @Column(name = "token", length = 64)
     private String token;
-
-    @Column(name = "tokenExpDate")
     private Date tokenExpDate;
-
-    @Column(name = "name", length =20)
     private String name;
-
-    @Column(name = "photo", length =50)
     private String photo;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "gender_id")
+    @Reference
     private Gender gender;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "city_id")
+    @Reference
     private City city;
-
-    @Column(name = "is_locked")
-    private Boolean isLocked;
-
-    @Column(name = "last_update_date")
+    private boolean locked;
     private Date lastUpdateDate;
-
-    @Column(name = "create_date")
     private Date createDate;
 
-    public int getId() {
+    public ObjectId getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(ObjectId id) {
         this.id = id;
     }
 
@@ -157,12 +129,12 @@ public class User {
         this.city = city;
     }
 
-    public Boolean getLocked() {
-        return isLocked;
+    public boolean isLocked() {
+        return locked;
     }
 
-    public void setLocked(Boolean locked) {
-        isLocked = locked;
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
 
     public Date getLastUpdateDate() {

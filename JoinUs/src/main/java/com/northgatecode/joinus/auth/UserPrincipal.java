@@ -1,5 +1,7 @@
 package com.northgatecode.joinus.auth;
 
+import org.bson.types.ObjectId;
+
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +10,7 @@ import java.util.List;
  * Created by qianliang on 18/2/2016.
  */
 public class UserPrincipal implements Principal {
-    private int id;
+    private ObjectId id;
     private String name;
     private List<String> roles;
 
@@ -16,11 +18,12 @@ public class UserPrincipal implements Principal {
         roles = new ArrayList<>();
     }
 
-    public int getId() {
+
+    public ObjectId getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(ObjectId id) {
         this.id = id;
     }
 

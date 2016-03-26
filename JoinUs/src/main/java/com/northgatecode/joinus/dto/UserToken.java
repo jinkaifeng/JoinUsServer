@@ -1,6 +1,7 @@
 package com.northgatecode.joinus.dto;
 
-import com.northgatecode.joinus.dao.User;
+import com.northgatecode.joinus.mongodb.User;
+import org.bson.types.ObjectId;
 
 import java.util.Date;
 
@@ -8,7 +9,7 @@ import java.util.Date;
  * Created by qianliang on 3/3/2016.
  */
 public class UserToken {
-    private int userId;
+    private ObjectId userId;
     private String securityToken;
     private Date experiationDate;
 
@@ -20,11 +21,11 @@ public class UserToken {
         this.experiationDate = user.getTokenExpDate();
     }
 
-    public int getUserId() {
+    public ObjectId getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(ObjectId userId) {
         this.userId = userId;
     }
 

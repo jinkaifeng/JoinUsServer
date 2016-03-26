@@ -1,8 +1,9 @@
 package com.northgatecode.joinus.auth;
 
-import com.northgatecode.joinus.dao.Role;
-import com.northgatecode.joinus.dao.User;
+import com.northgatecode.joinus.mongodb.Role;
+import com.northgatecode.joinus.mongodb.User;
 import com.northgatecode.joinus.services.UserService;
+import org.bson.types.ObjectId;
 
 import javax.annotation.Priority;
 import javax.ws.rs.NotAuthorizedException;
@@ -36,18 +37,18 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
         String userId = containerRequestContext.getHeaderString("user-id");
         String token = containerRequestContext.getHeaderString("security-token");
-        if (userId == null || userId.length() == 0 || token == null || token.length() == 0) {
-            throw new NotAuthorizedException("value of user-id or security-token can't be null", Response.noContent());
+        if (userId == null || userId.length() != 24 || token == null || token.length() != 64) {
+            throw new NotAuthorizedException("Invalid user-id or security-token", Response.noContent());
         }
 
-        User user = UserService.getById(Integer.parseInt(userId));
+        User user = UserService.getById(new ObjectId(userId));
 
         if (user == null) {
             throw new NotAuthorizedException("user-id doesn't exist", Response.noContent());
         }
 
-        if (user.getLocked()) {
-            throw new NotAuthorizedException("account is locked", Response.noContent());
+        if (user.isLocked()) {
+            throw new NotAuthorizedException("Account is locked", Response.noContent());
         }
 
         if (user.getTokenExpDate().compareTo(new Date()) < 0 || !user.getToken().equals(token)) {
@@ -59,7 +60,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         userPrincipal.setName(user.getName());
 
         for (Role role : user.getRoles()) {
-            userPrincipal.addRole(Integer.toString(role.getId()));
+            userPrincipal.addRole(Long.toString(role.getId()));
         }
 
         RoleBasedSecurityContext securityContext = new RoleBasedSecurityContext(userPrincipal);
