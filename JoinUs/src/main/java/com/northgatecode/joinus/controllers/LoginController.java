@@ -28,9 +28,13 @@ public class LoginController {
         List<User> existingUsers = MorphiaHelper.getDatastore().createQuery(User.class)
                 .field("mobile").equal(mobile).asList();
 
-            if (existingUsers.size() == 0) {
-                throw new BadRequestException("此号码还没有注册, 请注册.");
-            }
+        if (existingUsers.size() == 0) {
+            throw new BadRequestException("此号码还没有注册, 请注册.");
+        }
+
+        if (existingUsers.get(0).isLocked()) {
+            throw new BadRequestException("此账号已被锁定.");
+        }
 
         VerifyCodeService.generateCodeAndSendSMS(mobile);
         return Response.ok(new Message("验证码已发送, 有效期5分钟.")).build();
@@ -43,6 +47,9 @@ public class LoginController {
             throw new BadRequestException("验证码错误");
         }
         User user = UserService.getByMobile(mobileVerifyCode.getMobile());
+        if (user.isLocked()) {
+            throw new BadRequestException("此账号已被锁定.");
+        }
         UserService.refreshToken(user);
         return Response.ok(new UserProfileWithToken(new UserProfile(user), new UserToken(user))).build();
     }
@@ -55,6 +62,10 @@ public class LoginController {
             throw new BadRequestException("此号码还没有注册,请先注册");
         }
 
+        if (user.isLocked()) {
+            throw new BadRequestException("此账号已被锁定.");
+        }
+
         if (user.getPassword() == null || user.getPassword().length() == 0) {
             throw new BadRequestException("您还没有设置密码");
         }
@@ -62,6 +73,7 @@ public class LoginController {
         if (!UserService.verifyPassword(user, mobilePassword.getPassword())) {
             throw new BadRequestException("密码错误");
         }
+
         UserService.refreshToken(user);
         return Response.ok(new UserProfileWithToken(new UserProfile(user), new UserToken(user))).build();
     }

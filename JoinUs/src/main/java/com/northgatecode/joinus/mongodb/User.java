@@ -24,13 +24,15 @@ public class User {
     private String token;
     private Date tokenExpDate;
     private String name;
-    private String photo;
+    @Reference
+    private Image photo;
     @Reference
     private Gender gender;
     @Reference
     private City city;
     private boolean locked;
     private Date lastUpdateDate;
+    private Date registerDate;
     private Date createDate;
 
     public ObjectId getId() {
@@ -105,11 +107,11 @@ public class User {
         this.name = name;
     }
 
-    public String getPhoto() {
+    public Image getPhoto() {
         return photo;
     }
 
-    public void setPhoto(String photo) {
+    public void setPhoto(Image photo) {
         this.photo = photo;
     }
 
@@ -143,6 +145,14 @@ public class User {
 
     public void setLastUpdateDate(Date lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
+    }
+
+    public Date getRegisterDate() {
+        return registerDate;
+    }
+
+    public void setRegisterDate(Date registerDate) {
+        this.registerDate = registerDate;
     }
 
     public Date getCreateDate() {

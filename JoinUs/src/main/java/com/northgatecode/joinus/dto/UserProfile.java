@@ -21,6 +21,7 @@ public class UserProfile {
     private Gender gender;
     private City city;
     private Date lastUpdateDate;
+    private Date registerDate;
     private List<Role> roles;
 
     public UserProfile() {}
@@ -30,10 +31,11 @@ public class UserProfile {
         this.mobile = user.getMobile();
         this.email = user.getEmail();
         this.name = user.getName();
-        this.photo = user.getPhoto();
+        this.photo = user.getPhoto().getName();
         this.city = user.getCity();
         this.gender = user.getGender();
         this.lastUpdateDate = user.getLastUpdateDate();
+        this.registerDate = user.getRegisterDate();
         this.roles = user.getRoles();
     }
 
@@ -99,6 +101,14 @@ public class UserProfile {
 
     public void setLastUpdateDate(Date lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
+    }
+
+    public Date getRegisterDate() {
+        return registerDate;
+    }
+
+    public void setRegisterDate(Date registerDate) {
+        this.registerDate = registerDate;
     }
 
     public List<Role> getRoles() {

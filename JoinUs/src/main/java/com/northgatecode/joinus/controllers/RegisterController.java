@@ -88,6 +88,7 @@ public class RegisterController {
 
         user.setCreateDate(new Date());
         user.setLastUpdateDate(new Date());
+        user.setRegisterDate(new Date());
 
         user.setLocked(false);
 
