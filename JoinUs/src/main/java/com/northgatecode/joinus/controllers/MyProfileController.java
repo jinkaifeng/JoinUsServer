@@ -101,7 +101,7 @@ public class MyProfileController {
 
         datastore.save(user);
 
-        return Response.ok().build();
+        return Response.ok(new UserProfile(user)).build();
     }
 
     @POST
@@ -119,7 +119,7 @@ public class MyProfileController {
 
         datastore.save(user);
 
-        return Response.ok().build();
+        return Response.ok(new UserProfile(user)).build();
     }
 
     @POST
@@ -167,14 +167,14 @@ public class MyProfileController {
 
         float shorterSide = image.getHeight() > image.getWidth() ? image.getWidth() : image.getHeight();
         List<String> dimensions = new ArrayList<>();
-        Thumbnails.of(imageFile).scale(320 / shorterSide).toFile(Utils.getResizedFolder()
-                + image.getName() + "_320" + image.getExtension());
+        Thumbnails.of(imageFile).scale(320 / shorterSide).toFile(FilenameUtils.concat(Utils.getResizedFolder(),
+                image.getName() + "_320" + image.getExtension()));
         dimensions.add("_320");
-        Thumbnails.of(imageFile).scale(160 / shorterSide).toFile(Utils.getResizedFolder()
-                + image.getName() + "_160" + image.getExtension());
+        Thumbnails.of(imageFile).scale(160 / shorterSide).toFile(FilenameUtils.concat(Utils.getResizedFolder(),
+                image.getName() + "_160" + image.getExtension()));
         dimensions.add("_160");
-        Thumbnails.of(imageFile).scale(80 / shorterSide).toFile(Utils.getResizedFolder()
-                + image.getName() + "_80" + image.getExtension());
+        Thumbnails.of(imageFile).scale(80 / shorterSide).toFile(FilenameUtils.concat(Utils.getResizedFolder(),
+                image.getName() + "_80" + image.getExtension()));
         dimensions.add("_80");
         image.setDimensions(dimensions);
 
@@ -208,7 +208,7 @@ public class MyProfileController {
 
         datastore.save(user);
 
-        return Response.ok().build();
+        return Response.ok(new UserProfile(user)).build();
     }
 
     @POST
@@ -230,6 +230,6 @@ public class MyProfileController {
 
         datastore.save(user);
 
-        return Response.ok().build();
+        return Response.ok(new UserProfile(user)).build();
     }
 }

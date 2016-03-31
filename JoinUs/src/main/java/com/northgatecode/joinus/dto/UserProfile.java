@@ -31,7 +31,7 @@ public class UserProfile {
         this.mobile = user.getMobile();
         this.email = user.getEmail();
         this.name = user.getName();
-        this.photo = user.getPhoto().getName();
+        this.photo = user.getPhoto() != null ? user.getPhoto().getName() : null;
         this.city = user.getCity();
         this.gender = user.getGender();
         this.lastUpdateDate = user.getLastUpdateDate();
