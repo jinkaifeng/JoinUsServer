@@ -2,6 +2,8 @@ package com.northgatecode.joinus.mongodb;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.*;
+import org.mongodb.morphia.utils.IndexDirection;
+import org.mongodb.morphia.utils.IndexType;
 
 import java.util.Date;
 import java.util.List;
@@ -10,17 +12,25 @@ import java.util.List;
  * Created by qianliang on 24/3/2016.
  */
 @Entity(noClassnameStored = true)
+@Indexes({
+        @Index(fields = @Field(value = "name")),
+        @Index(fields = @Field(value = "activity", type = IndexType.DESC)),
+        @Index(fields = @Field(value = "createdByUserId")),
+        @Index(fields = @Field(value = "createDate", type = IndexType.DESC)),
+        @Index(fields = @Field(value = "$**", type = IndexType.TEXT))
+})
 public class Forum {
     @Id
     private ObjectId id;
     private String name;
     private String desc;
-    private String image;
-    private int totalPosts;
-    private int totalMembers;
+    private ObjectId iconImageId;
+    private int posts;
+    private int members;
     private int activity;
-    @Reference
-    private User createdBy;
+    private String categories;
+    private boolean deleted;
+    private ObjectId createdByUserId;
     private Date createDate;
 
     public ObjectId getId() {
@@ -47,28 +57,28 @@ public class Forum {
         this.desc = desc;
     }
 
-    public String getImage() {
-        return image;
+    public ObjectId getIconImageId() {
+        return iconImageId;
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    public void setIconImageId(ObjectId iconImageId) {
+        this.iconImageId = iconImageId;
     }
 
-    public int getTotalPosts() {
-        return totalPosts;
+    public int getPosts() {
+        return posts;
     }
 
-    public void setTotalPosts(int totalPosts) {
-        this.totalPosts = totalPosts;
+    public void setPosts(int posts) {
+        this.posts = posts;
     }
 
-    public int getTotalMembers() {
-        return totalMembers;
+    public int getMembers() {
+        return members;
     }
 
-    public void setTotalMembers(int totalMembers) {
-        this.totalMembers = totalMembers;
+    public void setMembers(int members) {
+        this.members = members;
     }
 
     public int getActivity() {
@@ -79,12 +89,28 @@ public class Forum {
         this.activity = activity;
     }
 
-    public User getCreatedBy() {
-        return createdBy;
+    public String getCategories() {
+        return categories;
     }
 
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
+    public void setCategories(String categories) {
+        this.categories = categories;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public ObjectId getCreatedByUserId() {
+        return createdByUserId;
+    }
+
+    public void setCreatedByUserId(ObjectId createdByUserId) {
+        this.createdByUserId = createdByUserId;
     }
 
     public Date getCreateDate() {

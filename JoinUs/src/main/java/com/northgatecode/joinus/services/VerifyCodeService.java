@@ -14,17 +14,17 @@ public class VerifyCodeService {
 
     private static Logger logger = Logger.getLogger(VerifyCodeService.class.getName());
 
-    public static String getKey(String mobile) {
-        return "JoinUs.VerifyCode:" + mobile;
+    public static String getKey(String mobile, String type) {
+        return "JoinUs.VerifyCode:" + mobile + ":" + type;
     }
 
-    public static String generateCodeAndSendSMS(String mobile) {
+    public static String generateCodeAndSendSMS(String mobile, String type) {
         //String code = RandomStringUtils.randomNumeric(6);
         String code = "123456";
         logger.log(Level.INFO, "Verify Code Generated for mobile: " + mobile + " code: " + code);
 
         try(Jedis jedis = JedisHelper.getResource()) {
-            String key = getKey(mobile);
+            String key = getKey(mobile, type);
             jedis.set(key, code);
             jedis.expire(key, 60 * 5);
         }
@@ -33,10 +33,10 @@ public class VerifyCodeService {
         return code;
     }
 
-    public static Boolean verify(String mobile, String code) {
+    public static Boolean verify(String mobile, String type, String code) {
 
         try(Jedis jedis = JedisHelper.getResource()) {
-            String key = getKey(mobile);
+            String key = getKey(mobile, type);
             if (!jedis.exists(key)) {
                 return false;
             }

@@ -2,6 +2,7 @@ package com.northgatecode.joinus.mongodb;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.*;
+import org.mongodb.morphia.utils.IndexDirection;
 
 import java.util.Date;
 import java.util.List;
@@ -13,18 +14,17 @@ import java.util.List;
 public class Topic {
     @Id
     private int id;
-    @Reference
-    private Forum forum;
+    @Indexed
+    private ObjectId forumId;
     private String title;
-    @Reference
-    private User postedBy;
+    private ObjectId postedByUserId;
     private int views;
-    @Reference
-    private Post firstPost;
-    @Reference
-    private Post lastPost;
-    private Date postDate;
-    private Date lastUpdateDate;
+    private ObjectId firstPostId;
+    private Date firstPostDate;
+    private ObjectId lastPostId;
+    @Indexed(value = IndexDirection.DESC)
+    private Date lastPostDate;
+    private List<String> images;
     private boolean deleted;
 
     public int getId() {
@@ -35,12 +35,12 @@ public class Topic {
         this.id = id;
     }
 
-    public Forum getForum() {
-        return forum;
+    public ObjectId getForumId() {
+        return forumId;
     }
 
-    public void setForum(Forum forum) {
-        this.forum = forum;
+    public void setForumId(ObjectId forumId) {
+        this.forumId = forumId;
     }
 
     public String getTitle() {
@@ -51,12 +51,12 @@ public class Topic {
         this.title = title;
     }
 
-    public User getPostedBy() {
-        return postedBy;
+    public ObjectId getPostedByUserId() {
+        return postedByUserId;
     }
 
-    public void setPostedBy(User postedBy) {
-        this.postedBy = postedBy;
+    public void setPostedByUserId(ObjectId postedByUserId) {
+        this.postedByUserId = postedByUserId;
     }
 
     public int getViews() {
@@ -67,36 +67,36 @@ public class Topic {
         this.views = views;
     }
 
-    public Post getFirstPost() {
-        return firstPost;
+    public ObjectId getFirstPostId() {
+        return firstPostId;
     }
 
-    public void setFirstPost(Post firstPost) {
-        this.firstPost = firstPost;
+    public void setFirstPostId(ObjectId firstPostId) {
+        this.firstPostId = firstPostId;
     }
 
-    public Post getLastPost() {
-        return lastPost;
+    public ObjectId getLastPostId() {
+        return lastPostId;
     }
 
-    public void setLastPost(Post lastPost) {
-        this.lastPost = lastPost;
+    public void setLastPostId(ObjectId lastPostId) {
+        this.lastPostId = lastPostId;
     }
 
-    public Date getPostDate() {
-        return postDate;
+    public Date getFirstPostDate() {
+        return firstPostDate;
     }
 
-    public void setPostDate(Date postDate) {
-        this.postDate = postDate;
+    public void setFirstPostDate(Date firstPostDate) {
+        this.firstPostDate = firstPostDate;
     }
 
-    public Date getLastUpdateDate() {
-        return lastUpdateDate;
+    public Date getLastPostDate() {
+        return lastPostDate;
     }
 
-    public void setLastUpdateDate(Date lastUpdateDate) {
-        this.lastUpdateDate = lastUpdateDate;
+    public void setLastPostDate(Date lastPostDate) {
+        this.lastPostDate = lastPostDate;
     }
 
     public boolean isDeleted() {

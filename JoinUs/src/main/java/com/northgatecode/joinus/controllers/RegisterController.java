@@ -1,6 +1,10 @@
 package com.northgatecode.joinus.controllers;
 
 import com.northgatecode.joinus.dto.*;
+import com.northgatecode.joinus.dto.user.MobileVerifyCode;
+import com.northgatecode.joinus.dto.user.UserProfile;
+import com.northgatecode.joinus.dto.user.UserProfileWithToken;
+import com.northgatecode.joinus.dto.user.UserToken;
 import com.northgatecode.joinus.mongodb.Gender;
 import com.northgatecode.joinus.mongodb.Role;
 import com.northgatecode.joinus.mongodb.User;
@@ -10,14 +14,11 @@ import com.northgatecode.joinus.utils.JpaHelper;
 import com.northgatecode.joinus.utils.MorphiaHelper;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.mongodb.morphia.Datastore;
-import org.mongodb.morphia.query.Query;
 
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -48,7 +49,7 @@ public class RegisterController {
                 throw new BadRequestException("此号码已注册, 请直接登陆.");
             }
 
-            VerifyCodeService.generateCodeAndSendSMS(mobile);
+            VerifyCodeService.generateCodeAndSendSMS(mobile, "register");
 
         } finally {
             entityManager.close();
@@ -60,7 +61,7 @@ public class RegisterController {
     @PUT
     public Response register(MobileVerifyCode mobileVerifyCode) {
 
-        if (!VerifyCodeService.verify(mobileVerifyCode.getMobile(), mobileVerifyCode.getVerifyCode())) {
+        if (!VerifyCodeService.verify(mobileVerifyCode.getMobile(), "register", mobileVerifyCode.getVerifyCode())) {
             throw new BadRequestException("验证码错误或者已经过期,请重新验证.");
         }
 

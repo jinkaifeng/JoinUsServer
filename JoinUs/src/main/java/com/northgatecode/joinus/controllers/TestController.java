@@ -2,6 +2,7 @@ package com.northgatecode.joinus.controllers;
 
 import com.mongodb.MongoClient;
 import com.northgatecode.joinus.auth.Authenticated;
+import com.northgatecode.joinus.mongodb.Category;
 import com.northgatecode.joinus.mongodb.Gender;
 import com.northgatecode.joinus.mongodb.Post;
 import com.northgatecode.joinus.mongodb.Role;
@@ -59,6 +60,18 @@ public class TestController {
         datastore.save(new Gender(2, "男"));
         datastore.save(new Gender(3, "女"));
 
+        datastore.save(new Category(1, "手机数码"));
+        datastore.save(new Category(2, "计算机技术"));
+        datastore.save(new Category(3, "黑科技"));
+        datastore.save(new Category(4, "娱乐明星"));
+        datastore.save(new Category(5, "电影电视"));
+        datastore.save(new Category(6, "体育"));
+        datastore.save(new Category(7, "游戏"));
+        datastore.save(new Category(8, "动漫"));
+        datastore.save(new Category(9, "高校"));
+        datastore.save(new Category(100, "其他"));
+
+
         return "Database successfully initialized.";
     }
 
@@ -68,10 +81,6 @@ public class TestController {
     public String mongoDB() {
 
         Post post = new Post();
-        post.setContent("test");
-        post.setPostDate(new Date());
-        post.setLastUpdateDate(new Date());
-        post.setDeleted(false);
 
         final Morphia morphia = new Morphia();
         // tell Morphia where to find your classes
