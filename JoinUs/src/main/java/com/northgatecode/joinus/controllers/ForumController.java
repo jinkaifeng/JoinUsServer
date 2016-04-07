@@ -73,20 +73,20 @@ public class ForumController {
         forum.setDesc(forumEdit.getDesc());
         forum.setIconImageId(forumEdit.getIcon().getImageId());
         forum.setPosts(0);
-        forum.setMembers(1);
+        forum.setWatch(1);
         forum.setActivity(1);
         forum.setDeleted(false);
         forum.setCreatedByUserId(userId);
         forum.setCreateDate(new Date());
         datastore.save(forum);
 
-        ForumMember forumMember = new ForumMember();
-        forumMember.setForumId(forum.getId());
-        forumMember.setUserId(userId);
-        forumMember.setLevel(1);
-        forumMember.setAdmin(true);
-        forumMember.setJoinDate(new Date());
-        datastore.save(forumMember);
+        ForumWatch forumWatch = new ForumWatch();
+        forumWatch.setForumId(forum.getId());
+        forumWatch.setUserId(userId);
+        forumWatch.setLevel(1);
+        forumWatch.setAdmin(true);
+        forumWatch.setJoinDate(new Date());
+        datastore.save(forumWatch);
 
         String categories = "";
         for (Category category : forumEdit.getCategories()) {

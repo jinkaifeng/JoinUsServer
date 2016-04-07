@@ -3,7 +3,6 @@ package com.northgatecode.joinus.dto.forum;
 import com.northgatecode.joinus.mongodb.Forum;
 import com.northgatecode.joinus.mongodb.Image;
 import com.northgatecode.joinus.utils.MorphiaHelper;
-import org.bson.types.ObjectId;
 
 /**
  * Created by qianliang on 4/4/2016.
@@ -13,7 +12,7 @@ public class ForumItem {
     private String desc;
     private String icon;
     private int posts;
-    private int members;
+    private int watch;
 
     public ForumItem() {
     }
@@ -23,7 +22,7 @@ public class ForumItem {
         this.desc = forum.getDesc();
         this.icon = MorphiaHelper.getDatastore().find(Image.class).field("id").equal(forum.getIconImageId()).get().getName();
         this.posts = forum.getPosts();
-        this.members = forum.getMembers();
+        this.watch = forum.getWatch();
     }
 
     public String getName() {
@@ -58,11 +57,11 @@ public class ForumItem {
         this.posts = posts;
     }
 
-    public int getMembers() {
-        return members;
+    public int getWatch() {
+        return watch;
     }
 
-    public void setMembers(int members) {
-        this.members = members;
+    public void setWatch(int watch) {
+        this.watch = watch;
     }
 }

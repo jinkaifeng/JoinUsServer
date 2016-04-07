@@ -12,16 +12,15 @@ import java.util.List;
 @Entity(noClassnameStored = true)
 public class City {
     @Id
-    private long id;
+    private int id;
     private String name;
-    @Reference
-    private Province province;
+    private ObjectId provinceId;
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -33,11 +32,11 @@ public class City {
         this.name = name;
     }
 
-    public Province getProvince() {
-        return province;
+    public ObjectId getProvinceId() {
+        return provinceId;
     }
 
-    public void setProvince(Province province) {
-        this.province = province;
+    public void setProvinceId(ObjectId provinceId) {
+        this.provinceId = provinceId;
     }
 }

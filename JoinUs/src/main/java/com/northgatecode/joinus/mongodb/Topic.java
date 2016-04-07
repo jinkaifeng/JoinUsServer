@@ -3,6 +3,7 @@ package com.northgatecode.joinus.mongodb;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.*;
 import org.mongodb.morphia.utils.IndexDirection;
+import org.mongodb.morphia.utils.IndexType;
 
 import java.util.Date;
 import java.util.List;
@@ -11,10 +12,13 @@ import java.util.List;
  * Created by qianliang on 24/3/2016.
  */
 @Entity(noClassnameStored = true)
+@Indexes({
+        @Index(fields = @Field(value = "forumId")),
+        @Index(fields = @Field(value = "lastPostDate", type = IndexType.DESC)),
+})
 public class Topic {
     @Id
     private int id;
-    @Indexed
     private ObjectId forumId;
     private String title;
     private ObjectId postedByUserId;
@@ -22,7 +26,6 @@ public class Topic {
     private ObjectId firstPostId;
     private Date firstPostDate;
     private ObjectId lastPostId;
-    @Indexed(value = IndexDirection.DESC)
     private Date lastPostDate;
     private List<String> images;
     private boolean deleted;
@@ -75,14 +78,6 @@ public class Topic {
         this.firstPostId = firstPostId;
     }
 
-    public ObjectId getLastPostId() {
-        return lastPostId;
-    }
-
-    public void setLastPostId(ObjectId lastPostId) {
-        this.lastPostId = lastPostId;
-    }
-
     public Date getFirstPostDate() {
         return firstPostDate;
     }
@@ -91,12 +86,28 @@ public class Topic {
         this.firstPostDate = firstPostDate;
     }
 
+    public ObjectId getLastPostId() {
+        return lastPostId;
+    }
+
+    public void setLastPostId(ObjectId lastPostId) {
+        this.lastPostId = lastPostId;
+    }
+
     public Date getLastPostDate() {
         return lastPostDate;
     }
 
     public void setLastPostDate(Date lastPostDate) {
         this.lastPostDate = lastPostDate;
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
     }
 
     public boolean isDeleted() {

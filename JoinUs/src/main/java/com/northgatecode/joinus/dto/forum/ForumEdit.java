@@ -11,6 +11,7 @@ import java.util.List;
  * Created by qianliang on 2/4/2016.
  */
 public class ForumEdit {
+
     private ObjectId id;
     private String name;
     private String desc;

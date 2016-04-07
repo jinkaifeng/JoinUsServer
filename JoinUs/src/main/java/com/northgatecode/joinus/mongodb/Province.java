@@ -10,7 +10,7 @@ import java.util.List;
 @Entity(noClassnameStored = true)
 public class Province {
     @Id
-    private long id;
+    private int id;
     private String name;
     @Reference
     private transient List<City> cities;
@@ -19,7 +19,7 @@ public class Province {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

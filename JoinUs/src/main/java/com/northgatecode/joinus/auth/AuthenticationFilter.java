@@ -59,9 +59,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         userPrincipal.setId(user.getId());
         userPrincipal.setName(user.getName());
 
-        for (Role role : user.getRoles()) {
-            userPrincipal.addRole(Long.toString(role.getId()));
-        }
+
+        userPrincipal.addRole(Integer.toString(user.getRoleId()));
 
         RoleBasedSecurityContext securityContext = new RoleBasedSecurityContext(userPrincipal);
 

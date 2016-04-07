@@ -20,8 +20,7 @@ public class Image {
     private int width;
     private int height;
     private long size;
-    @Reference
-    private User uploadedBy;
+    private ObjectId uploadedBy;
     private Date uploadDate;
     private List<String> dimensions;
 
@@ -73,11 +72,11 @@ public class Image {
         this.size = size;
     }
 
-    public User getUploadedBy() {
+    public ObjectId getUploadedBy() {
         return uploadedBy;
     }
 
-    public void setUploadedBy(User uploadedBy) {
+    public void setUploadedBy(ObjectId uploadedBy) {
         this.uploadedBy = uploadedBy;
     }
 

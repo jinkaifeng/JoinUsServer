@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Entity(noClassnameStored = true)
 @Indexes({
-        @Index(fields = @Field(value = "name")),
+        @Index(fields = @Field(value = "name"), options = @IndexOptions(unique = true)),
         @Index(fields = @Field(value = "activity", type = IndexType.DESC)),
         @Index(fields = @Field(value = "createdByUserId")),
         @Index(fields = @Field(value = "createDate", type = IndexType.DESC)),
@@ -26,7 +26,7 @@ public class Forum {
     private String desc;
     private ObjectId iconImageId;
     private int posts;
-    private int members;
+    private int watch;
     private int activity;
     private String categories;
     private boolean deleted;
@@ -73,12 +73,12 @@ public class Forum {
         this.posts = posts;
     }
 
-    public int getMembers() {
-        return members;
+    public int getWatch() {
+        return watch;
     }
 
-    public void setMembers(int members) {
-        this.members = members;
+    public void setWatch(int watch) {
+        this.watch = watch;
     }
 
     public int getActivity() {

@@ -15,8 +15,7 @@ import java.util.List;
 public class User {
     @Id
     private ObjectId id;
-    @Reference
-    private List<Role> roles;
+    private int roleId;
     private String mobile;
     private String email;
     private String password;
@@ -24,12 +23,9 @@ public class User {
     private String token;
     private Date tokenExpDate;
     private String name;
-    @Reference
-    private Image photo;
-    @Reference
-    private Gender gender;
-    @Reference
-    private City city;
+    private ObjectId photoImageId;
+    private int genderId;
+    private int cityId;
     private boolean locked;
     private Date lastUpdateDate;
     private Date registerDate;
@@ -43,12 +39,12 @@ public class User {
         this.id = id;
     }
 
-    public List<Role> getRoles() {
-        return roles;
+    public int getRoleId() {
+        return roleId;
     }
 
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
+    public void setRoleId(int roleId) {
+        this.roleId = roleId;
     }
 
     public String getMobile() {
@@ -107,28 +103,28 @@ public class User {
         this.name = name;
     }
 
-    public Image getPhoto() {
-        return photo;
+    public ObjectId getPhotoImageId() {
+        return photoImageId;
     }
 
-    public void setPhoto(Image photo) {
-        this.photo = photo;
+    public void setPhotoImageId(ObjectId photoImageId) {
+        this.photoImageId = photoImageId;
     }
 
-    public Gender getGender() {
-        return gender;
+    public int getGenderId() {
+        return genderId;
     }
 
-    public void setGender(Gender gender) {
-        this.gender = gender;
+    public void setGenderId(int genderId) {
+        this.genderId = genderId;
     }
 
-    public City getCity() {
-        return city;
+    public int getCityId() {
+        return cityId;
     }
 
-    public void setCity(City city) {
-        this.city = city;
+    public void setCityId(int cityId) {
+        this.cityId = cityId;
     }
 
     public boolean isLocked() {

@@ -4,13 +4,13 @@ package com.northgatecode.joinus.dto.user;
  * Created by qianliang on 28/3/2016.
  */
 public class UserCity {
-    private long cityId;
+    private int cityId;
 
-    public long getCityId() {
+    public int getCityId() {
         return cityId;
     }
 
-    public void setCityId(long cityId) {
+    public void setCityId(int cityId) {
         this.cityId = cityId;
     }
 }

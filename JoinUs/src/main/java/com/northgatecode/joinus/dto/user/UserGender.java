@@ -4,13 +4,13 @@ package com.northgatecode.joinus.dto.user;
  * Created by qianliang on 28/3/2016.
  */
 public class UserGender {
-    private long genderId;
+    private int genderId;
 
-    public long getGenderId() {
+    public int getGenderId() {
         return genderId;
     }
 
-    public void setGenderId(long genderId) {
+    public void setGenderId(int genderId) {
         this.genderId = genderId;
     }
 }

@@ -10,13 +10,13 @@ import java.util.List;
 @Entity(noClassnameStored = true)
 public class Role {
     @Id
-    private long id;
+    private int id;
     private String name;
 
     public Role() {
     }
 
-    public Role(long id, String name) {
+    public Role(int id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -25,7 +25,7 @@ public class Role {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
     }
 

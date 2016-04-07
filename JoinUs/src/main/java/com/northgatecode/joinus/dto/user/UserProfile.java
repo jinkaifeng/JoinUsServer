@@ -4,8 +4,12 @@ import com.northgatecode.joinus.mongodb.City;
 import com.northgatecode.joinus.mongodb.Gender;
 import com.northgatecode.joinus.mongodb.Role;
 import com.northgatecode.joinus.mongodb.User;
+import com.northgatecode.joinus.services.ImageService;
+import com.northgatecode.joinus.utils.MorphiaHelper;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.Datastore;
 
+import javax.xml.crypto.Data;
 import java.util.Date;
 import java.util.List;
 
@@ -19,24 +23,31 @@ public class UserProfile {
     private String name;
     private String photo;
     private Gender gender;
+    private Role role;
     private City city;
     private Date lastUpdateDate;
     private Date registerDate;
-    private List<Role> roles;
 
     public UserProfile() {}
 
     public UserProfile(User user) {
+        Datastore datastore = MorphiaHelper.getDatastore();
         this.id = user.getId();
         this.mobile = user.getMobile();
         this.email = user.getEmail();
         this.name = user.getName();
-        this.photo = user.getPhoto() != null ? user.getPhoto().getName() : null;
-        this.city = user.getCity();
-        this.gender = user.getGender();
+        this.photo = ImageService.getImageName(user.getPhotoImageId());
+        if (user.getCityId() != 0) {
+            this.city = datastore.find(City.class).field("id").equal(user.getCityId()).get();
+        }
+        if (user.getGenderId() != 0) {
+            this.gender = datastore.find(Gender.class).field("id").equal(user.getGenderId()).get();
+        }
+        if (user.getRoleId() != 0) {
+            this.role = datastore.find(Role.class).field("id").equal(user.getRoleId()).get();
+        }
         this.lastUpdateDate = user.getLastUpdateDate();
         this.registerDate = user.getRegisterDate();
-        this.roles = user.getRoles();
     }
 
     public ObjectId getId() {
@@ -87,6 +98,14 @@ public class UserProfile {
         this.gender = gender;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     public City getCity() {
         return city;
     }
@@ -109,13 +128,5 @@ public class UserProfile {
 
     public void setRegisterDate(Date registerDate) {
         this.registerDate = registerDate;
-    }
-
-    public List<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
     }
 }

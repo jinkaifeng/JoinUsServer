@@ -7,6 +7,7 @@ import com.northgatecode.joinus.mongodb.City;
 import com.northgatecode.joinus.mongodb.Gender;
 import com.northgatecode.joinus.mongodb.Image;
 import com.northgatecode.joinus.mongodb.User;
+import com.northgatecode.joinus.services.ImageService;
 import com.northgatecode.joinus.services.UserService;
 import com.northgatecode.joinus.utils.MorphiaHelper;
 import com.northgatecode.joinus.utils.Utils;
@@ -127,19 +128,12 @@ public class MyProfileController {
     public Response updatePhoto(@Context SecurityContext securityContext, @FormDataParam("file") InputStream fileInputStream,
                                 @FormDataParam("file") FormDataContentDisposition fileMetaData) throws IOException {
 
-        UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
-        ObjectId userId = userPrincipal.getId();
-
-        Datastore datastore = MorphiaHelper.getDatastore();
-        User user = datastore.find(User.class).field("id").equal(userId).get();
-
         if (!FilenameUtils.getExtension(fileMetaData.getFileName()).toLowerCase().equals("jpg")) {
             throw new BadRequestException("JPG file only");
         }
 
-        String name = UUID.randomUUID().toString();
-        String fileName =  name + ".jpg";
-        String fullPath = FilenameUtils.concat(Utils.getUploadFolder(), fileName);
+        String imageName = UUID.randomUUID().toString();
+        String fullPath = FilenameUtils.concat( Utils.getUploadFolder(), imageName + ".jpg");
 
         OutputStream out = new FileOutputStream(fullPath);
         int read;
@@ -150,37 +144,17 @@ public class MyProfileController {
         out.flush();
         out.close();
 
-        File imageFile = new File(fullPath);
-        BufferedImage originalImage = ImageIO.read(imageFile);
+        UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
+        ObjectId userId = userPrincipal.getId();
 
-        Image image = new Image();
-        image.setName(name);
-        image.setExtension(".jpg");
-        image.setSize(imageFile.length());
-        image.setWidth(originalImage.getWidth());
-        image.setHeight(originalImage.getHeight());
-        image.setUploadedBy(user);
-        image.setUploadDate(new Date());
+        Image image = ImageService.saveImage(imageName, userId);
 
-        float shorterSide = image.getHeight() > image.getWidth() ? image.getWidth() : image.getHeight();
-        List<String> dimensions = new ArrayList<>();
-        Thumbnails.of(imageFile).scale(320 / shorterSide).toFile(FilenameUtils.concat(Utils.getResizedFolder(),
-                image.getName() + "_320" + image.getExtension()));
-        dimensions.add("_320");
-        Thumbnails.of(imageFile).scale(160 / shorterSide).toFile(FilenameUtils.concat(Utils.getResizedFolder(),
-                image.getName() + "_160" + image.getExtension()));
-        dimensions.add("_160");
-        Thumbnails.of(imageFile).scale(80 / shorterSide).toFile(FilenameUtils.concat(Utils.getResizedFolder(),
-                image.getName() + "_80" + image.getExtension()));
-        dimensions.add("_80");
-        image.setDimensions(dimensions);
+        ImageService.addDimensions(image.getId(), new int[]{320, 160, 80});
 
-        datastore.save(image);
-
-
-        user.setPhoto(image);
+        Datastore datastore = MorphiaHelper.getDatastore();
+        User user = datastore.find(User.class).field("id").equal(userId).get();
+        user.setPhotoImageId(image.getId());
         user.setLastUpdateDate(new Date());
-
         datastore.save(user);
 
         return Response.ok(new UserProfile(user)).build();
@@ -200,7 +174,7 @@ public class MyProfileController {
         if (gender == null) {
             throw new BadRequestException("无效的性别代码");
         }
-        user.setGender(gender);
+        user.setGenderId(userGender.getGenderId());
         user.setLastUpdateDate(new Date());
 
         datastore.save(user);
@@ -222,7 +196,7 @@ public class MyProfileController {
         if (city == null) {
             throw new BadRequestException("无效的城市代码");
         }
-        user.setCity(city);
+        user.setCityId(city.getId());
         user.setLastUpdateDate(new Date());
 
         datastore.save(user);

@@ -78,12 +78,8 @@ public class RegisterController {
         user.setMobile(mobileVerifyCode.getMobile());
         user.setName("用户" + RandomStringUtils.randomNumeric(6));
 
-        Role registeredRole = datastore.find(Role.class).field("id").equal(2).get();
-        user.setRoles(new ArrayList<Role>());
-        user.getRoles().add(registeredRole);
-
-        Gender unknownGender = datastore.find(Gender.class).field("id").equal(1).get();
-        user.setGender(unknownGender);
+        user.setRoleId(2); // 注册用户
+        user.setGenderId(1); // 保密
 
         UserService.generateToken(user);
 
