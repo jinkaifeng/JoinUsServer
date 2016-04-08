@@ -40,7 +40,9 @@ public class RegisterController {
         EntityManager entityManager = JpaHelper.getFactory().createEntityManager();
         try {
             // check is valid mobile number
-
+            if (mobile.length() != 11) {
+                new BadRequestException("无效的手机号码");
+            }
             // check same number
             List<User> sameMobileUsers = MorphiaHelper.getDatastore().createQuery(User.class)
                     .field("mobile").equal(mobile).asList();

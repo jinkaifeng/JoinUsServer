@@ -9,9 +9,10 @@ import java.util.List;
  * Created by qianliang on 25/3/2016.
  */
 @Entity(noClassnameStored = true)
-@Indexes(
-        @Index(fields = @Field(value = "mobile"), options = @IndexOptions(unique = true))
-)
+@Indexes({
+        @Index(fields = @Field(value = "mobile"), options = @IndexOptions(unique = true)),
+        @Index(fields = @Field(value = "name"), options = @IndexOptions(unique = true))
+})
 public class User {
     @Id
     private ObjectId id;

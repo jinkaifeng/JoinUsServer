@@ -14,7 +14,16 @@ public class City {
     @Id
     private int id;
     private String name;
-    private ObjectId provinceId;
+    private int provinceId;
+
+    public City() {
+    }
+
+    public City(int id, String name, int provinceId) {
+        this.id = id;
+        this.name = name;
+        this.provinceId = provinceId;
+    }
 
     public int getId() {
         return id;
@@ -32,11 +41,11 @@ public class City {
         this.name = name;
     }
 
-    public ObjectId getProvinceId() {
+    public int getProvinceId() {
         return provinceId;
     }
 
-    public void setProvinceId(ObjectId provinceId) {
+    public void setProvinceId(int provinceId) {
         this.provinceId = provinceId;
     }
 }

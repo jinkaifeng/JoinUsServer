@@ -12,10 +12,16 @@ public class Province {
     @Id
     private int id;
     private String name;
-    @Reference
-    private transient List<City> cities;
 
-    public long getId() {
+    public Province() {
+    }
+
+    public Province(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public int getId() {
         return id;
     }
 
@@ -29,13 +35,5 @@ public class Province {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public List<City> getCities() {
-        return cities;
-    }
-
-    public void setCities(List<City> cities) {
-        this.cities = cities;
     }
 }
