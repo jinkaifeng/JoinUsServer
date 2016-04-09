@@ -18,9 +18,11 @@ import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.bson.types.ObjectId;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.hibernate.dialect.function.NoArgSQLFunction;
 import org.mongodb.morphia.Datastore;
 
 import javax.imageio.ImageIO;
@@ -129,16 +131,19 @@ public class MyProfileController {
 
         User user = datastore.find(User.class).field("id").equal(userId).get();
 
-        if (user.getPassword() != null && !UserService.verifyPassword(user, userPassword.getOldPassword())) {
+        if (user.getPassword() != null && !UserService.verifyPassword(user, userPassword.getCurrentPassword())) {
             throw new BadRequestException("原密码错误");
         }
         // validate password
-        if (userPassword.getNewPassword().length() < 6) {
+//        String regex = "^[a-zA-Z0-9-_]{4,16}$";
+//        Pattern pattern = Pattern.compile(regex);
+//        Matcher matcher = pattern.matcher(user.getPassword());
+        if (userPassword.getPassword().length() < 4) {
             throw new BadRequestException("无效的新密码");
         }
 
         String salt = RandomStringUtils.randomAlphanumeric(4);
-        String hashedPassword = DigestUtils.md5Hex(userPassword.getNewPassword() + salt);
+        String hashedPassword = DigestUtils.md5Hex(userPassword.getPassword() + salt);
 
         user.setPassword(hashedPassword);
         user.setSalt(salt);
@@ -175,30 +180,46 @@ public class MyProfileController {
         return Response.ok(new UserProfile(user)).build();
     }
 
+    private String nameRegx = "^[0-9a-zA-Z\u4E00-\u9FA5]{2,10}$";
+
     @POST
-    @Path("checkName")
+    @Path("validateName")
     public Response checkName(UserName userName) {
-        String regex = "^[0-9a-zA-Z\u4E00-\u9FA5]{2,10}$";
-        Pattern pattern = Pattern.compile(regex);
+
+//        try {
+//            Thread.sleep(RandomUtils.nextInt(1000, 3000)); //1000 milliseconds is one second.
+//        } catch(InterruptedException ex) {
+//            Thread.currentThread().interrupt();
+//        }
+
+        if (userName.getName().length() < 2) {
+            throw new NotAcceptableException("用户名过短,用户名应不少于2个字符.");
+        }
+
+        if (userName.getName().length() > 10) {
+            throw new NotAcceptableException("用户名过长,用户名不应超过10个字符.");
+        }
+
+        Pattern pattern = Pattern.compile(nameRegx);
         Matcher matcher = pattern.matcher(userName.getName());
         if (!matcher.matches()) {
-            return  Response.status(Response.Status.NOT_ACCEPTABLE).entity(new Message("无效的用户名")).build();
+            throw new NotAcceptableException("用户名含有非法字符,用户名只可以使用中文或英文字母。");
         }
 
         Datastore datastore = MorphiaHelper.getDatastore();
         List<User> sameNameUsers = datastore.createQuery(User.class).field("name").equalIgnoreCase(userName.getName()).asList();
         if (sameNameUsers.size() > 0) {
-            return Response.status(Response.Status.NOT_ACCEPTABLE).entity(new Message("用户名已经被使用")).build();
+            throw new NotAcceptableException("已存在同名用户,请重新选择用户名.");
         }
-        return Response.ok().build();
+
+        return Response.ok(userName).build();
     }
 
     @POST
     @Path("name")
     @Authenticated
     public Response updateName(@Context SecurityContext securityContext, UserName userName) {
-        String regex = "^[0-9a-zA-Z\u4E00-\u9FA5]{2,10}$";
-        Pattern pattern = Pattern.compile(regex);
+        Pattern pattern = Pattern.compile(nameRegx);
         Matcher matcher = pattern.matcher(userName.getName());
         if (!matcher.matches()) {
             throw  new BadRequestException("无效的用户名");

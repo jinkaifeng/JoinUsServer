@@ -4,22 +4,22 @@ package com.northgatecode.joinus.dto.user;
  * Created by qianliang on 2/3/2016.
  */
 public class UserPassword {
-    private String oldPassword;
-    private String newPassword;
+    private String currentPassword;
+    private String password;
 
-    public String getOldPassword() {
-        return oldPassword;
+    public String getCurrentPassword() {
+        return currentPassword;
     }
 
-    public void setOldPassword(String oldPassword) {
-        this.oldPassword = oldPassword;
+    public void setCurrentPassword(String currentPassword) {
+        this.currentPassword = currentPassword;
     }
 
-    public String getNewPassword() {
-        return newPassword;
+    public String getPassword() {
+        return password;
     }
 
-    public void setNewPassword(String newPassword) {
-        this.newPassword = newPassword;
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
