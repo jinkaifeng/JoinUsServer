@@ -20,7 +20,8 @@ public class ForumItem {
     public ForumItem(Forum forum) {
         this.name = forum.getName();
         this.desc = forum.getDesc();
-        this.icon = MorphiaHelper.getDatastore().find(Image.class).field("id").equal(forum.getIconImageId()).get().getName();
+        Image image = MorphiaHelper.getDatastore().find(Image.class).field("id").equal(forum.getIconImageId()).get();
+        this.icon = image != null ? image.getName() : null;
         this.posts = forum.getPosts();
         this.watch = forum.getWatch();
     }

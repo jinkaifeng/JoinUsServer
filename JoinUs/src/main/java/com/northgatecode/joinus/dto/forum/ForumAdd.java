@@ -10,21 +10,11 @@ import java.util.List;
 /**
  * Created by qianliang on 2/4/2016.
  */
-public class ForumEdit {
-
-    private ObjectId id;
+public class ForumAdd {
     private String name;
     private String desc;
-    private UploadImage icon;
-    private List<Category> categories;
-
-    public ObjectId getId() {
-        return id;
-    }
-
-    public void setId(ObjectId id) {
-        this.id = id;
-    }
+    private ObjectId iconImageId;
+    private List<Integer> categoryIds;
 
     public String getName() {
         return name;
@@ -42,19 +32,19 @@ public class ForumEdit {
         this.desc = desc;
     }
 
-    public UploadImage getIcon() {
-        return icon;
+    public ObjectId getIconImageId() {
+        return iconImageId;
     }
 
-    public void setIcon(UploadImage icon) {
-        this.icon = icon;
+    public void setIconImageId(ObjectId iconImageId) {
+        this.iconImageId = iconImageId;
     }
 
-    public List<Category> getCategories() {
-        return categories;
+    public List<Integer> getCategoryIds() {
+        return categoryIds;
     }
 
-    public void setCategories(List<Category> categories) {
-        this.categories = categories;
+    public void setCategoryIds(List<Integer> categoryIds) {
+        this.categoryIds = categoryIds;
     }
 }

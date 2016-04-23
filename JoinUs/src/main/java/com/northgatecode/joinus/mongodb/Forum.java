@@ -11,14 +11,17 @@ import java.util.List;
 /**
  * Created by qianliang on 24/3/2016.
  */
+
 @Entity(noClassnameStored = true)
 @Indexes({
         @Index(fields = @Field(value = "name"), options = @IndexOptions(unique = true)),
         @Index(fields = @Field(value = "activity", type = IndexType.DESC)),
+        @Index(fields = @Field(value = "deleted")),
         @Index(fields = @Field(value = "createdByUserId")),
         @Index(fields = @Field(value = "createDate", type = IndexType.DESC)),
         @Index(fields = @Field(value = "$**", type = IndexType.TEXT))
 })
+
 public class Forum {
     @Id
     private ObjectId id;

@@ -184,7 +184,7 @@ public class MyProfileController {
 
     @POST
     @Path("validateName")
-    public Response checkName(UserName userName) {
+    public Response validateName(UserName userName) {
 
 //        try {
 //            Thread.sleep(RandomUtils.nextInt(1000, 3000)); //1000 milliseconds is one second.
@@ -219,21 +219,28 @@ public class MyProfileController {
     @Path("name")
     @Authenticated
     public Response updateName(@Context SecurityContext securityContext, UserName userName) {
+        if (userName.getName().length() < 2) {
+            throw new BadRequestException("用户名过短,用户名应不少于2个字符.");
+        }
+
+        if (userName.getName().length() > 10) {
+            throw new BadRequestException("用户名过长,用户名不应超过10个字符.");
+        }
+
         Pattern pattern = Pattern.compile(nameRegx);
         Matcher matcher = pattern.matcher(userName.getName());
         if (!matcher.matches()) {
-            throw  new BadRequestException("无效的用户名");
+            throw new BadRequestException("用户名含有非法字符,用户名只可以使用中文或英文字母。");
+        }
+
+        Datastore datastore = MorphiaHelper.getDatastore();
+        List<User> sameNameUsers = datastore.createQuery(User.class).field("name").equalIgnoreCase(userName.getName()).asList();
+        if (sameNameUsers.size() > 0) {
+            throw new BadRequestException("已存在同名用户,请重新选择用户名.");
         }
 
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
         ObjectId userId = userPrincipal.getId();
-
-        Datastore datastore = MorphiaHelper.getDatastore();
-
-        List<User> sameNameUsers = datastore.createQuery(User.class).field("name").equalIgnoreCase(userName.getName()).asList();
-        if (sameNameUsers.size() > 0) {
-            throw new BadRequestException("存在同名用户");
-        }
 
         User user = datastore.find(User.class).field("id").equal(userId).get();
         user.setName(userName.getName());
@@ -270,6 +277,12 @@ public class MyProfileController {
     @GET
     @Path("provinces")
     public Response getProvinceList() {
+//        try {
+//            Thread.sleep(RandomUtils.nextInt(500, 2000)); //1000 milliseconds is one second.
+//        } catch (InterruptedException ex) {
+//            Thread.currentThread().interrupt();
+//        }
+
         ProvinceList provinceList = RegionService.getProvinceList();
         return Response.ok(provinceList).build();
     }

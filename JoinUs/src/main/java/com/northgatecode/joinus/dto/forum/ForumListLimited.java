@@ -2,6 +2,7 @@ package com.northgatecode.joinus.dto.forum;
 
 import com.northgatecode.joinus.mongodb.Forum;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -13,10 +14,14 @@ public class ForumListLimited {
     private int limit;
 
     public ForumListLimited() {
+
     }
 
-    public ForumListLimited(List<ForumItem> list, int offset, int limit) {
-        this.list = list;
+    public ForumListLimited(List<Forum> forums, int offset, int limit) {
+        this.list = new ArrayList<>();
+        for (Forum forum : forums) {
+            this.list.add(new ForumItem(forum));
+        }
         this.offset = offset;
         this.limit = limit;
     }

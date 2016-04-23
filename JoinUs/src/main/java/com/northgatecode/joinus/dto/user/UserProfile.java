@@ -1,9 +1,8 @@
 package com.northgatecode.joinus.dto.user;
 
-import com.northgatecode.joinus.mongodb.City;
-import com.northgatecode.joinus.mongodb.Gender;
-import com.northgatecode.joinus.mongodb.Role;
-import com.northgatecode.joinus.mongodb.User;
+import com.northgatecode.joinus.dto.region.CityInfo;
+import com.northgatecode.joinus.dto.region.ProvinceInfo;
+import com.northgatecode.joinus.mongodb.*;
 import com.northgatecode.joinus.services.ImageService;
 import com.northgatecode.joinus.utils.MorphiaHelper;
 import org.bson.types.ObjectId;
@@ -24,7 +23,7 @@ public class UserProfile {
     private String photo;
     private Gender gender;
     private Role role;
-    private City city;
+    private CityInfo city;
     private Date lastUpdateDate;
     private Date registerDate;
 
@@ -38,7 +37,9 @@ public class UserProfile {
         this.name = user.getName();
         this.photo = ImageService.getImageName(user.getPhotoImageId());
         if (user.getCityId() != 0) {
-            this.city = datastore.find(City.class).field("id").equal(user.getCityId()).get();
+            City city = datastore.find(City.class).field("id").equal(user.getCityId()).get();
+            this.city = new CityInfo(city);
+            this.city.setProvince(new ProvinceInfo(datastore.find(Province.class).field("id").equal(city.getProvinceId()).get()));
         }
         if (user.getGenderId() != 0) {
             this.gender = datastore.find(Gender.class).field("id").equal(user.getGenderId()).get();
@@ -106,11 +107,11 @@ public class UserProfile {
         this.role = role;
     }
 
-    public City getCity() {
+    public CityInfo getCity() {
         return city;
     }
 
-    public void setCity(City city) {
+    public void setCity(CityInfo city) {
         this.city = city;
     }
 

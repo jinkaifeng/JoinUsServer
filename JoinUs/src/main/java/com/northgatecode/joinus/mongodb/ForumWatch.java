@@ -12,7 +12,8 @@ import java.util.List;
  */
 @Indexes({
         @Index(fields = @Field(value = "forumId")),
-        @Index(fields = @Field(value = "userId"))
+        @Index(fields = @Field(value = "userId")),
+        @Index(fields = @Field(value = "lastPostDate", type = IndexType.DESC))
 })
 @Entity(noClassnameStored = true)
 public class ForumWatch {
@@ -23,6 +24,7 @@ public class ForumWatch {
     private int level;
     private boolean isAdmin;
     private Date joinDate;
+    private Date lastPostDate;
 
     public ObjectId getId() {
         return id;
@@ -70,5 +72,13 @@ public class ForumWatch {
 
     public void setJoinDate(Date joinDate) {
         this.joinDate = joinDate;
+    }
+
+    public Date getLastPostDate() {
+        return lastPostDate;
+    }
+
+    public void setLastPostDate(Date lastPostDate) {
+        this.lastPostDate = lastPostDate;
     }
 }

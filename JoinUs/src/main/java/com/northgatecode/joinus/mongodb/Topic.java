@@ -18,7 +18,7 @@ import java.util.List;
 })
 public class Topic {
     @Id
-    private int id;
+    private ObjectId id;
     private ObjectId forumId;
     private String title;
     private ObjectId postedByUserId;
@@ -27,14 +27,13 @@ public class Topic {
     private Date firstPostDate;
     private ObjectId lastPostId;
     private Date lastPostDate;
-    private List<String> images;
     private boolean deleted;
 
-    public int getId() {
+    public ObjectId getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(ObjectId id) {
         this.id = id;
     }
 
@@ -100,14 +99,6 @@ public class Topic {
 
     public void setLastPostDate(Date lastPostDate) {
         this.lastPostDate = lastPostDate;
-    }
-
-    public List<String> getImages() {
-        return images;
-    }
-
-    public void setImages(List<String> images) {
-        this.images = images;
     }
 
     public boolean isDeleted() {
