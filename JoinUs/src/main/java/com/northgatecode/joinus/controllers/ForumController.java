@@ -4,6 +4,7 @@ import com.northgatecode.joinus.auth.Authenticated;
 import com.northgatecode.joinus.auth.UserPrincipal;
 import com.northgatecode.joinus.dto.forum.*;
 import com.northgatecode.joinus.mongodb.*;
+import com.northgatecode.joinus.services.ForumService;
 import com.northgatecode.joinus.services.ImageService;
 import com.northgatecode.joinus.utils.MorphiaHelper;
 import org.apache.commons.lang3.RandomUtils;
@@ -29,7 +30,6 @@ import java.util.regex.Pattern;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class ForumController {
-
     @GET
     public Response getForums(@QueryParam("search") String search, @QueryParam("offset") int offset, @QueryParam("limit") int limit) {
 
@@ -55,7 +55,7 @@ public class ForumController {
     @GET
     @Path("watching")
     @Authenticated
-    public Response wactching(@Context SecurityContext securityContext, @QueryParam("offset") int offset, @QueryParam("limit") int limit) {
+    public Response watching(@Context SecurityContext securityContext, @QueryParam("offset") int offset, @QueryParam("limit") int limit) {
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
         ObjectId userId = userPrincipal.getId();
 
@@ -83,20 +83,20 @@ public class ForumController {
         return Response.ok(new ForumListLimited(forums, offset, limit)).build();
     }
 
-    private String nameRegx = "^[0-9a-zA-Z\u4E00-\u9FA5]{3,16}$";
+    private String nameRegex = "^[\\s\\w\u4E00-\u9FA5]{3,16}$";
     @POST
     @Path("validateName")
     public Response validateName(ForumName forumName) {
 
-        if (forumName.getName().length() < 3) {
-            throw new NotAcceptableException("论坛名称过短,论坛名称不少于3个字符.");
+        if (forumName.getName() == null || forumName.getName().length() < 3) {
+            throw new BadRequestException("论坛名称过短,论坛名称不少于3个字符.");
         }
 
         if (forumName.getName().length() > 16) {
             throw new NotAcceptableException("论坛名称过长,论坛名称不应超过16个字符.");
         }
 
-        Pattern pattern = Pattern.compile(nameRegx);
+        Pattern pattern = Pattern.compile(nameRegex);
         Matcher matcher = pattern.matcher(forumName.getName());
         if (!matcher.matches()) {
             throw new NotAcceptableException("论坛名称含有非法字符,论坛名称只可以使用中文或英文字母。");
@@ -113,12 +113,12 @@ public class ForumController {
 
     @PUT
     @Authenticated
-    public Response createForum(@Context SecurityContext securityContext, ForumAdd forumAdd) throws IOException {
+    public Response createForum(@Context SecurityContext securityContext, ForumAdd forumAdd) {
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
         ObjectId userId = userPrincipal.getId();
         Datastore datastore = MorphiaHelper.getDatastore();
 
-        if (forumAdd.getName().length() < 3) {
+        if (forumAdd.getName() == null || forumAdd.getName().length() < 3) {
             throw new BadRequestException("论坛名称过短,论坛名称不少于3个字符.");
         }
 
@@ -126,7 +126,7 @@ public class ForumController {
             throw new BadRequestException("论坛名称过长,论坛名称不应超过16个字符.");
         }
 
-        Pattern pattern = Pattern.compile(nameRegx);
+        Pattern pattern = Pattern.compile(nameRegex);
         Matcher matcher = pattern.matcher(forumAdd.getName());
         if (!matcher.matches()) {
             throw new BadRequestException("论坛名称含有非法字符,论坛名称只可以使用中文或英文字母。");
@@ -149,6 +149,8 @@ public class ForumController {
             throw new BadRequestException("无效的论坛图标");
         }
 
+        int score = 10;
+
         Forum forum = new Forum();
         forum.setName(forumAdd.getName());
         forum.setDesc(forumAdd.getDesc());
@@ -160,14 +162,6 @@ public class ForumController {
         forum.setCreatedByUserId(userId);
         forum.setCreateDate(new Date());
         datastore.save(forum);
-
-        ForumWatch forumWatch = new ForumWatch();
-        forumWatch.setForumId(forum.getId());
-        forumWatch.setUserId(userId);
-        forumWatch.setLevel(1);
-        forumWatch.setAdmin(true);
-        forumWatch.setJoinDate(new Date());
-        datastore.save(forumWatch);
 
         String categories = "";
         for (int categoryId : forumAdd.getCategoryIds()) {
@@ -186,6 +180,17 @@ public class ForumController {
 
         ImageService.addDimensions(forum.getIconImageId(), new int[]{240, 120});
 
+        ForumWatch forumWatch = new ForumWatch();
+        forumWatch.setForumId(forum.getId());
+        forumWatch.setUserId(userId);
+        forumWatch.setPosts(0);
+        forumWatch.setScore(score);
+        forumWatch.setLevel(ForumService.getLeveByScore(forumWatch.getScore()));
+        forumWatch.setAdmin(true);
+        forumWatch.setJoinDate(new Date());
+        forumWatch.setDeleted(false);
+        datastore.save(forumWatch);
+
         return Response.ok().build();
     }
 
@@ -196,6 +201,7 @@ public class ForumController {
         List<Category> categories = datastore.createQuery(Category.class).asList();
         return Response.ok(new CategoryList(categories)).build();
     }
+
     @DELETE
     @Path("{id}")
     @Authenticated
@@ -203,7 +209,7 @@ public class ForumController {
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
         ObjectId userId = userPrincipal.getId();
         Datastore datastore = MorphiaHelper.getDatastore();
-        Forum forum = datastore.createQuery(Forum.class).field("id").equal(forumId).get();
+        Forum forum = datastore.createQuery(Forum.class).field("id").equal(new ObjectId(forumId)).get();
         if (forum == null) {
             throw new BadRequestException("您要删除的论坛不存在");
         }
@@ -218,17 +224,78 @@ public class ForumController {
 
     @GET
     @Path("{id}")
-    public Response getFormAndTopics(@PathParam("id") String forumId, @QueryParam("offset") int offset, @QueryParam("limit") int limit) {
-        if (limit == 0) limit = 10;
+    public Response getForumAndTopics(@PathParam("id") String forumId, @QueryParam("offset") int offset, @QueryParam("limit") int limit) {
         Datastore datastore = MorphiaHelper.getDatastore();
-        Forum forum = datastore.createQuery(Forum.class).field("id").equal(forumId).get();
-        if (forum == null) {
-            throw new BadRequestException("无效的论坛id");
+        Forum forum = datastore.createQuery(Forum.class).field("id").equal(new ObjectId(forumId)).get();
+        if (forum == null || forum.isDeleted()) {
+            throw new BadRequestException("无效的论坛id或论坛已删除");
         }
-        List<Topic> topics = datastore.createQuery(Topic.class).field("forumId").equal(forumId)
-                .field("deleted").equal(false).order("-lastPostDate").offset(offset).limit(limit).asList();
-
+        if (limit == 0) limit = 10;
+        List<Topic> topics = datastore.createQuery(Topic.class).field("forumId").equal(forum.getId())
+                .field("deleted").equal(false).order("onTop").order("-lastPostDate").offset(offset).limit(limit).asList();
         return Response.ok(new TopicListLimited(forum, topics, offset, limit)).build();
+    }
+
+    @GET
+    @Path("{id}/watch")
+    @Authenticated
+    public Response watch(@Context SecurityContext securityContext, @PathParam("id") String forumId) {
+        UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
+        ObjectId userId = userPrincipal.getId();
+        Datastore datastore = MorphiaHelper.getDatastore();
+
+        Forum forum = datastore.createQuery(Forum.class).field("id").equal(forumId).get();
+        if (forum == null || forum.isDeleted()) {
+            throw new BadRequestException("您要关注的论坛不存在或已经删除");
+        }
+
+        ForumWatch forumWatch = datastore.find(ForumWatch.class).field("forumId").equal(forumId)
+                .field("userId").equal(userId).get();
+        if (forumWatch == null) {
+
+            forumWatch = new ForumWatch();
+            forumWatch.setForumId(forum.getId());
+            forumWatch.setUserId(userId);
+            forumWatch.setPosts(0);
+            forumWatch.setScore(1);
+            forumWatch.setLevel(ForumService.getLeveByScore(forumWatch.getScore()));
+            if (forum.getCreatedByUserId() == userId) {
+                forumWatch.setAdmin(true);
+            } else {
+                forumWatch.setAdmin(false);
+            }
+            forumWatch.setJoinDate(new Date());
+            forumWatch.setDeleted(false);
+
+        } else {
+            forumWatch.setDeleted(false);
+        }
+        datastore.save(forumWatch);
+
+        return Response.ok().build();
+    }
+
+    @GET
+    @Path("{id}/unwatch")
+    @Authenticated
+    public Response unwatch(@Context SecurityContext securityContext, @PathParam("id") String forumId) {
+        UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
+        ObjectId userId = userPrincipal.getId();
+        Datastore datastore = MorphiaHelper.getDatastore();
+
+        Forum forum = datastore.createQuery(Forum.class).field("id").equal(forumId).get();
+        if (forum == null || forum.isDeleted()) {
+            throw new BadRequestException("您要取消关注的论坛不存在或已经删除");
+        }
+
+        ForumWatch forumWatch = datastore.find(ForumWatch.class).field("forumId").equal(forumId)
+                .field("userId").equal(userId).get();
+        if (forumWatch != null) {
+            forumWatch.setDeleted(true);
+            datastore.save(forumWatch);
+        }
+
+        return Response.ok().build();
     }
 
 }

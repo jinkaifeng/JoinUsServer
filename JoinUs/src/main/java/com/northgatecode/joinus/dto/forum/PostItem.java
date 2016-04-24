@@ -1,9 +1,7 @@
 package com.northgatecode.joinus.dto.forum;
 
 import com.northgatecode.joinus.dto.user.UserInfo;
-import com.northgatecode.joinus.mongodb.Post;
-import com.northgatecode.joinus.mongodb.Reply;
-import com.northgatecode.joinus.mongodb.User;
+import com.northgatecode.joinus.mongodb.*;
 import com.northgatecode.joinus.utils.MorphiaHelper;
 import org.bson.types.ObjectId;
 
@@ -15,26 +13,36 @@ import java.util.List;
  * Created by qianliang on 21/4/2016.
  */
 public class PostItem {
+
     private ObjectId id;
-    private UserInfo postedBy;
+    private ForumUserInfo postedBy;
     private String content;
     private Date postDate;
-    private List<ReplyItem> replies;
+    private List<String> images;
+    private List<ReplyItem> replyItems;
 
     public PostItem() {
     }
 
     public PostItem(Post post) {
         this.id = post.getId();
-        User user = MorphiaHelper.getDatastore().find(User.class).field("id").equal(post.getPostedByUserId()).get();
-        this.postedBy = new UserInfo(user);
+        this.postedBy = new ForumUserInfo(post.getPostedByUserId(), post.getForumId());
         this.content = post.getContent();
         this.postDate = post.getPostDate();
-        this.replies = new ArrayList<>();
+        this.images = new ArrayList<>();
+        List<PostImage> postImages = MorphiaHelper.getDatastore().createQuery(PostImage.class)
+                .field("postId").equal(post.getId()).asList();
+        for (PostImage postImage : postImages) {
+            Image image = MorphiaHelper.getDatastore().find(Image.class).field("id").equal(postImage.getImageId()).get();
+            if (image != null) {
+                this.images.add(image.getName());
+            }
+        }
+        this.replyItems = new ArrayList<>();
         List<Reply> replies = MorphiaHelper.getDatastore().createQuery(Reply.class).field("postId").equal(post.getId())
-                .field("deleted").equal(false).order("-replyDate").asList();
+                .field("deleted").equal(false).order("replyDate").asList();
         for (Reply reply : replies) {
-            this.replies.add(new ReplyItem(reply));
+            this.replyItems.add(new ReplyItem(reply));
         }
     }
 
@@ -46,11 +54,11 @@ public class PostItem {
         this.id = id;
     }
 
-    public UserInfo getPostedBy() {
+    public ForumUserInfo getPostedBy() {
         return postedBy;
     }
 
-    public void setPostedBy(UserInfo postedBy) {
+    public void setPostedBy(ForumUserInfo postedBy) {
         this.postedBy = postedBy;
     }
 
@@ -70,11 +78,19 @@ public class PostItem {
         this.postDate = postDate;
     }
 
-    public List<ReplyItem> getReplies() {
-        return replies;
+    public List<String> getImages() {
+        return images;
     }
 
-    public void setReplies(List<ReplyItem> replies) {
-        this.replies = replies;
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
+
+    public List<ReplyItem> getReplyItems() {
+        return replyItems;
+    }
+
+    public void setReplyItems(List<ReplyItem> replyItems) {
+        this.replyItems = replyItems;
     }
 }

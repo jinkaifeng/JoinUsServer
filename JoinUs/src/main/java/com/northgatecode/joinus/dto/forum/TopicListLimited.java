@@ -10,8 +10,8 @@ import java.util.List;
  * Created by qianliang on 21/4/2016.
  */
 public class TopicListLimited {
-    private ForumInfo forum;
-    private List<TopicItem> list;
+    private ForumInfo forumInfo;
+    private List<TopicItem> topicItems;
     private int offset;
     private int limit;
 
@@ -19,29 +19,29 @@ public class TopicListLimited {
     }
 
     public TopicListLimited(Forum forum, List<Topic> topics, int offset, int limit) {
-        this.forum = new ForumInfo(forum);
-        this.list = new ArrayList<>();
+        this.forumInfo = new ForumInfo(forum);
+        this.topicItems = new ArrayList<>();
         for (Topic topic : topics) {
-            this.list.add(new TopicItem(topic));
+            this.topicItems.add(new TopicItem(topic));
         }
         this.offset = offset;
         this.limit = limit;
     }
 
-    public ForumInfo getForum() {
-        return forum;
+    public ForumInfo getForumInfo() {
+        return forumInfo;
     }
 
-    public void setForum(ForumInfo forum) {
-        this.forum = forum;
+    public void setForumInfo(ForumInfo forumInfo) {
+        this.forumInfo = forumInfo;
     }
 
-    public List<TopicItem> getList() {
-        return list;
+    public List<TopicItem> getTopicItems() {
+        return topicItems;
     }
 
-    public void setList(List<TopicItem> list) {
-        this.list = list;
+    public void setTopicItems(List<TopicItem> topicItems) {
+        this.topicItems = topicItems;
     }
 
     public int getOffset() {

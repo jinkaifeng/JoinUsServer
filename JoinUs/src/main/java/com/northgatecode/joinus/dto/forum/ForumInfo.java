@@ -2,9 +2,7 @@ package com.northgatecode.joinus.dto.forum;
 
 import com.northgatecode.joinus.dto.user.UserInfo;
 import com.northgatecode.joinus.mongodb.Forum;
-import com.northgatecode.joinus.mongodb.Image;
-import com.northgatecode.joinus.mongodb.User;
-import com.northgatecode.joinus.utils.MorphiaHelper;
+import com.northgatecode.joinus.services.ImageService;
 import org.bson.types.ObjectId;
 
 import java.util.Date;
@@ -20,7 +18,7 @@ public class ForumInfo {
     private int posts;
     private int watch;
     private int activity;
-    private UserInfo createdBy;
+    private ForumUserInfo createdBy;
     private Date createDate;
 
     public ForumInfo() {
@@ -30,13 +28,12 @@ public class ForumInfo {
         this.id = forum.getId();
         this.name = forum.getName();
         this.desc = forum.getDesc();
-        Image image = MorphiaHelper.getDatastore().find(Image.class).field("id").equal(forum.getIconImageId()).get();
-        this.icon = image != null ? image.getName() : null;
+        this.icon = ImageService.getImageName(forum.getIconImageId());
         this.posts = forum.getPosts();
         this.watch = forum.getWatch();
         this.activity = forum.getActivity();
-        User user = MorphiaHelper.getDatastore().find(User.class).field("id").equal(forum.getCreatedByUserId()).get();
-        this.createdBy = new UserInfo(user);
+        this.createdBy = new ForumUserInfo(forum.getCreatedByUserId(), forum.getId());
+        this.createDate = forum.getCreateDate();
     }
 
     public ObjectId getId() {
@@ -95,11 +92,11 @@ public class ForumInfo {
         this.activity = activity;
     }
 
-    public UserInfo getCreatedBy() {
+    public ForumUserInfo getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(UserInfo createdBy) {
+    public void setCreatedBy(ForumUserInfo createdBy) {
         this.createdBy = createdBy;
     }
 

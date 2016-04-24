@@ -13,12 +13,13 @@ import java.util.List;
 @Entity(noClassnameStored = true)
 @Indexes({
         @Index(fields = @Field(value = "topicId")),
-        @Index(fields = @Field(value = "postDate", type = IndexType.DESC))
+        @Index(fields = @Field(value = "postDate"))
 })
 public class Post {
     @Id
     private ObjectId id;
     private ObjectId topicId;
+    private ObjectId forumId;
     private ObjectId postedByUserId;
     private String content;
     private Date postDate;
@@ -38,6 +39,14 @@ public class Post {
 
     public void setTopicId(ObjectId topicId) {
         this.topicId = topicId;
+    }
+
+    public ObjectId getForumId() {
+        return forumId;
+    }
+
+    public void setForumId(ObjectId forumId) {
+        this.forumId = forumId;
     }
 
     public ObjectId getPostedByUserId() {

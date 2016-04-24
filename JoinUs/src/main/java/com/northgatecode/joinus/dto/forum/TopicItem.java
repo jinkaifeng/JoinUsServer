@@ -1,6 +1,7 @@
 package com.northgatecode.joinus.dto.forum;
 
 import com.northgatecode.joinus.dto.user.UserInfo;
+import com.northgatecode.joinus.mongodb.Forum;
 import com.northgatecode.joinus.mongodb.Post;
 import com.northgatecode.joinus.mongodb.Topic;
 import com.northgatecode.joinus.mongodb.User;
@@ -15,12 +16,14 @@ import java.util.Date;
 public class TopicItem {
     private ObjectId id;
     private String title;
-    private UserInfo postedBy;
+    private ForumUserInfo postedBy;
+    private int posts;
     private int views;
     private PostInfo firstPost;
     private Date firstPostDate;
     private PostInfo lastPost;
     private Date lastPostDate;
+    private boolean onTop;
 
     public TopicItem() {
     }
@@ -28,8 +31,8 @@ public class TopicItem {
     public TopicItem(Topic topic) {
         this.id = topic.getId();
         this.title = topic.getTitle();
-        User user = MorphiaHelper.getDatastore().find(User.class).field("id").equal(topic.getPostedByUserId()).get();
-        this.postedBy = new UserInfo(user);
+        this.postedBy = new ForumUserInfo(topic.getPostedByUserId(), topic.getForumId());
+        this.posts = topic.getPosts();
         this.views = topic.getViews();
         Post firstPost = MorphiaHelper.getDatastore().find(Post.class).field("id").equal(topic.getFirstPostId()).get();
         this.firstPost = new PostInfo(firstPost);
@@ -37,6 +40,7 @@ public class TopicItem {
         Post lastPost = MorphiaHelper.getDatastore().find(Post.class).field("id").equal(topic.getLastPostId()).get();
         this.lastPost = new PostInfo(lastPost);
         this.lastPostDate = topic.getLastPostDate();
+        this.onTop = topic.isOnTop();
     }
 
     public ObjectId getId() {
@@ -55,12 +59,20 @@ public class TopicItem {
         this.title = title;
     }
 
-    public UserInfo getPostedBy() {
+    public ForumUserInfo getPostedBy() {
         return postedBy;
     }
 
-    public void setPostedBy(UserInfo postedBy) {
+    public void setPostedBy(ForumUserInfo postedBy) {
         this.postedBy = postedBy;
+    }
+
+    public int getPosts() {
+        return posts;
+    }
+
+    public void setPosts(int posts) {
+        this.posts = posts;
     }
 
     public int getViews() {
@@ -101,5 +113,13 @@ public class TopicItem {
 
     public void setLastPostDate(Date lastPostDate) {
         this.lastPostDate = lastPostDate;
+    }
+
+    public boolean isOnTop() {
+        return onTop;
+    }
+
+    public void setOnTop(boolean onTop) {
+        this.onTop = onTop;
     }
 }

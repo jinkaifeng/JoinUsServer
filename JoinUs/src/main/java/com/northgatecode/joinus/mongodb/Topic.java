@@ -14,6 +14,7 @@ import java.util.List;
 @Entity(noClassnameStored = true)
 @Indexes({
         @Index(fields = @Field(value = "forumId")),
+        @Index(fields = @Field(value = "onTop")),
         @Index(fields = @Field(value = "lastPostDate", type = IndexType.DESC)),
 })
 public class Topic {
@@ -22,11 +23,13 @@ public class Topic {
     private ObjectId forumId;
     private String title;
     private ObjectId postedByUserId;
+    private int posts;
     private int views;
     private ObjectId firstPostId;
     private Date firstPostDate;
     private ObjectId lastPostId;
     private Date lastPostDate;
+    private boolean onTop;
     private boolean deleted;
 
     public ObjectId getId() {
@@ -59,6 +62,14 @@ public class Topic {
 
     public void setPostedByUserId(ObjectId postedByUserId) {
         this.postedByUserId = postedByUserId;
+    }
+
+    public int getPosts() {
+        return posts;
+    }
+
+    public void setPosts(int posts) {
+        this.posts = posts;
     }
 
     public int getViews() {
@@ -99,6 +110,14 @@ public class Topic {
 
     public void setLastPostDate(Date lastPostDate) {
         this.lastPostDate = lastPostDate;
+    }
+
+    public boolean isOnTop() {
+        return onTop;
+    }
+
+    public void setOnTop(boolean onTop) {
+        this.onTop = onTop;
     }
 
     public boolean isDeleted() {

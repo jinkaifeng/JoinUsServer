@@ -14,7 +14,8 @@ import java.util.Date;
 public class TopicInfo {
     private ObjectId id;
     private String title;
-    private UserInfo postedBy;
+    private ForumUserInfo postedBy;
+    private int posts;
     private int views;
 
     public TopicInfo() {
@@ -23,9 +24,9 @@ public class TopicInfo {
     public TopicInfo(Topic topic) {
         this.id = topic.getId();
         this.title = topic.getTitle();
-        User user = MorphiaHelper.getDatastore().find(User.class).field("id").equal(topic.getPostedByUserId()).get();
-        this.postedBy = new UserInfo(user);
+        this.postedBy = new ForumUserInfo(topic.getPostedByUserId(), topic.getForumId());
         this.views = topic.getViews();
+        this.posts = topic.getPosts();
     }
 
     public ObjectId getId() {
@@ -44,12 +45,20 @@ public class TopicInfo {
         this.title = title;
     }
 
-    public UserInfo getPostedBy() {
+    public ForumUserInfo getPostedBy() {
         return postedBy;
     }
 
-    public void setPostedBy(UserInfo postedBy) {
+    public void setPostedBy(ForumUserInfo postedBy) {
         this.postedBy = postedBy;
+    }
+
+    public int getPosts() {
+        return posts;
+    }
+
+    public void setPosts(int posts) {
+        this.posts = posts;
     }
 
     public int getViews() {

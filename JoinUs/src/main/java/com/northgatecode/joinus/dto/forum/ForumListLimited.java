@@ -9,7 +9,7 @@ import java.util.List;
  * Created by qianliang on 3/4/2016.
  */
 public class ForumListLimited {
-    private List<ForumItem> list;
+    private List<ForumItem> forumItems;
     private int offset;
     private int limit;
 
@@ -18,20 +18,20 @@ public class ForumListLimited {
     }
 
     public ForumListLimited(List<Forum> forums, int offset, int limit) {
-        this.list = new ArrayList<>();
+        this.forumItems = new ArrayList<>();
         for (Forum forum : forums) {
-            this.list.add(new ForumItem(forum));
+            this.forumItems.add(new ForumItem(forum));
         }
         this.offset = offset;
         this.limit = limit;
     }
 
-    public List<ForumItem> getList() {
-        return list;
+    public List<ForumItem> getForums() {
+        return forumItems;
     }
 
-    public void setList(List<ForumItem> list) {
-        this.list = list;
+    public void setForums(List<ForumItem> forums) {
+        this.forumItems = forums;
     }
 
     public int getOffset() {

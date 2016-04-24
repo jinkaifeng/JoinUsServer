@@ -22,9 +22,12 @@ public class ForumWatch {
     private ObjectId forumId;
     private ObjectId userId;
     private int level;
+    private int posts;
+    private int score;
     private boolean isAdmin;
     private Date joinDate;
     private Date lastPostDate;
+    private boolean deleted;
 
     public ObjectId getId() {
         return id;
@@ -58,6 +61,22 @@ public class ForumWatch {
         this.level = level;
     }
 
+    public int getPosts() {
+        return posts;
+    }
+
+    public void setPosts(int posts) {
+        this.posts = posts;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
     public boolean isAdmin() {
         return isAdmin;
     }
@@ -80,5 +99,13 @@ public class ForumWatch {
 
     public void setLastPostDate(Date lastPostDate) {
         this.lastPostDate = lastPostDate;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

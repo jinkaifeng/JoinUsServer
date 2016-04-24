@@ -1,17 +1,25 @@
 package com.northgatecode.joinus.mongodb;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.*;
+import org.mongodb.morphia.utils.IndexType;
 
 import java.util.Date;
 
 /**
  * Created by qianliang on 21/4/2016.
  */
+@Entity(noClassnameStored = true)
+@Indexes({
+        @Index(fields = @Field(value = "postId")),
+        @Index(fields = @Field(value = "replyDate"))
+})
 public class Reply {
     @Id
     private ObjectId id;
     private ObjectId postId;
+    private ObjectId topicId;
+    private ObjectId forumId;
     private ObjectId repliedByUserId;
     private String content;
     private Date replyDate;
@@ -31,6 +39,22 @@ public class Reply {
 
     public void setPostId(ObjectId postId) {
         this.postId = postId;
+    }
+
+    public ObjectId getTopicId() {
+        return topicId;
+    }
+
+    public void setTopicId(ObjectId topicId) {
+        this.topicId = topicId;
+    }
+
+    public ObjectId getForumId() {
+        return forumId;
+    }
+
+    public void setForumId(ObjectId forumId) {
+        this.forumId = forumId;
     }
 
     public ObjectId getRepliedByUserId() {

@@ -3,11 +3,13 @@ package com.northgatecode.joinus.dto.forum;
 import com.northgatecode.joinus.mongodb.Forum;
 import com.northgatecode.joinus.mongodb.Image;
 import com.northgatecode.joinus.utils.MorphiaHelper;
+import org.bson.types.ObjectId;
 
 /**
  * Created by qianliang on 4/4/2016.
  */
 public class ForumItem {
+    private ObjectId id;
     private String name;
     private String desc;
     private String icon;
@@ -18,12 +20,21 @@ public class ForumItem {
     }
 
     public ForumItem(Forum forum) {
+        this.id = forum.getId();
         this.name = forum.getName();
         this.desc = forum.getDesc();
         Image image = MorphiaHelper.getDatastore().find(Image.class).field("id").equal(forum.getIconImageId()).get();
         this.icon = image != null ? image.getName() : null;
         this.posts = forum.getPosts();
         this.watch = forum.getWatch();
+    }
+
+    public ObjectId getId() {
+        return id;
+    }
+
+    public void setId(ObjectId id) {
+        this.id = id;
     }
 
     public String getName() {

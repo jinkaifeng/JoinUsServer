@@ -9,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 
 import javax.imageio.ImageIO;
+import javax.ws.rs.InternalServerErrorException;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -57,9 +58,12 @@ public class ImageService {
         return image;
     }
 
-    public static void addDimensions(ObjectId imageId, int[] dimensions) throws IOException {
+    public static boolean addDimensions(ObjectId imageId, int[] dimensions) {
         Datastore datastore = MorphiaHelper.getDatastore();
         Image image = datastore.find(Image.class).field("id").equal(imageId).get();
+        if (image == null) {
+            return false;
+        }
         File imageFile = new File(FilenameUtils.concat(Utils.getUploadFolder(), image.getName() + image.getExtension()));
 
         float shorterSide = image.getHeight() > image.getWidth() ? image.getWidth() : image.getHeight();
@@ -76,11 +80,17 @@ public class ImageService {
                 }
             }
             if (!created) {
-                Thumbnails.of(imageFile).scale(dimension / shorterSide).toFile(FilenameUtils.concat(Utils.getResizedFolder(),
-                        image.getName() + "_" + dimension + image.getExtension()));
+                try {
+                    Thumbnails.of(imageFile).scale(dimension / shorterSide).toFile(FilenameUtils.concat(Utils.getResizedFolder(),
+                            image.getName() + "_" + dimension + image.getExtension()));
+                } catch (IOException ioEx) {
+                    throw new InternalServerErrorException("生成缩略图异常");
+                }
                 image.getDimensions().add("_" + dimension);
             }
         }
         datastore.save(image);
+
+        return true;
     }
 }

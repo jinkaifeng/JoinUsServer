@@ -1,8 +1,7 @@
 package com.northgatecode.joinus.dto.forum;
 
 import com.northgatecode.joinus.dto.user.UserInfo;
-import com.northgatecode.joinus.mongodb.Reply;
-import com.northgatecode.joinus.mongodb.User;
+import com.northgatecode.joinus.mongodb.*;
 import com.northgatecode.joinus.utils.MorphiaHelper;
 import org.bson.types.ObjectId;
 
@@ -13,7 +12,7 @@ import java.util.Date;
  */
 public class ReplyItem {
     private ObjectId id;
-    private UserInfo repliedBy;
+    private ForumUserInfo repliedBy;
     private String content;
     private Date replyDate;
 
@@ -22,8 +21,7 @@ public class ReplyItem {
 
     public ReplyItem(Reply reply) {
         this.id = reply.getId();
-        User user = MorphiaHelper.getDatastore().find(User.class).field("id").equal(reply.getRepliedByUserId()).get();
-        this.repliedBy = new UserInfo(user);
+        this.repliedBy = new ForumUserInfo(reply.getRepliedByUserId(), reply.getForumId());
         this.content = reply.getContent();
         this.replyDate = reply.getReplyDate();
     }
@@ -36,11 +34,11 @@ public class ReplyItem {
         this.id = id;
     }
 
-    public UserInfo getRepliedBy() {
+    public ForumUserInfo getRepliedBy() {
         return repliedBy;
     }
 
-    public void setRepliedBy(UserInfo repliedBy) {
+    public void setRepliedBy(ForumUserInfo repliedBy) {
         this.repliedBy = repliedBy;
     }
 

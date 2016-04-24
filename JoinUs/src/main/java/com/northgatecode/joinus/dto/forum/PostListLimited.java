@@ -11,27 +11,35 @@ import java.util.List;
  * Created by qianliang on 21/4/2016.
  */
 public class PostListLimited {
-    private TopicInfo topic;
-    private List<PostItem> list;
+    private TopicInfo topicInfo;
+    private List<PostItem> postItems;
     private int offset;
     private int limit;
 
     public PostListLimited(Topic topic, List<Post> posts, int offset, int limit) {
-        this.topic = new TopicInfo(topic);
-        this.list = new ArrayList<>();
+        this.topicInfo = new TopicInfo(topic);
+        this.postItems = new ArrayList<>();
         for (Post post : posts) {
-            this.list.add(new PostItem(post));
+            this.postItems.add(new PostItem(post));
         }
         this.offset = offset;
         this.limit = limit;
     }
 
-    public List<PostItem> getList() {
-        return list;
+    public TopicInfo getTopicInfo() {
+        return topicInfo;
     }
 
-    public void setList(List<PostItem> list) {
-        this.list = list;
+    public void setTopicInfo(TopicInfo topicInfo) {
+        this.topicInfo = topicInfo;
+    }
+
+    public List<PostItem> getPostItems() {
+        return postItems;
+    }
+
+    public void setPostItems(List<PostItem> postItems) {
+        this.postItems = postItems;
     }
 
     public int getOffset() {

@@ -1,10 +1,7 @@
 package com.northgatecode.joinus.dto.forum;
 
 import com.northgatecode.joinus.dto.user.UserInfo;
-import com.northgatecode.joinus.mongodb.Image;
-import com.northgatecode.joinus.mongodb.Post;
-import com.northgatecode.joinus.mongodb.PostImage;
-import com.northgatecode.joinus.mongodb.User;
+import com.northgatecode.joinus.mongodb.*;
 import com.northgatecode.joinus.utils.MorphiaHelper;
 import org.bson.types.ObjectId;
 
@@ -17,7 +14,7 @@ import java.util.List;
  */
 public class PostInfo {
     private ObjectId id;
-    private UserInfo postedBy;
+    private ForumUserInfo postedBy;
     private String content;
     private Date postDate;
     private List<String> images;
@@ -27,8 +24,7 @@ public class PostInfo {
 
     public PostInfo(Post post) {
         this.id = post.getId();
-        User user = MorphiaHelper.getDatastore().find(User.class).field("id").equal(post.getPostedByUserId()).get();
-        this.postedBy = new UserInfo(user);
+        this.postedBy = new ForumUserInfo(post.getPostedByUserId(), post.getForumId());
         this.content = post.getContent();
         this.images = new ArrayList<>();
         List<PostImage> postImages = MorphiaHelper.getDatastore().createQuery(PostImage.class)
@@ -49,11 +45,11 @@ public class PostInfo {
         this.id = id;
     }
 
-    public UserInfo getPostedBy() {
+    public ForumUserInfo getPostedBy() {
         return postedBy;
     }
 
-    public void setPostedBy(UserInfo postedBy) {
+    public void setPostedBy(ForumUserInfo postedBy) {
         this.postedBy = postedBy;
     }
 
@@ -71,5 +67,13 @@ public class PostInfo {
 
     public void setPostDate(Date postDate) {
         this.postDate = postDate;
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
     }
 }
