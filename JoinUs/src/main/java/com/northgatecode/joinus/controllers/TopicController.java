@@ -56,7 +56,7 @@ public class TopicController {
         int score = 10;
 
         Topic topic = new Topic();
-        topic.setForumId(topicAdd.getForumId());
+        topic.setForumId(forum.getId());
         topic.setTitle(topicAdd.getTitle());
         topic.setPostedByUserId(userId);
         topic.setOnTop(false);
@@ -65,7 +65,7 @@ public class TopicController {
 
         Post firstPost = new Post();
         firstPost.setTopicId(topic.getId());
-        firstPost.setForumId(topicAdd.getForumId());
+        firstPost.setForumId(forum.getId());
         firstPost.setContent(topicAdd.getFirstPost().getContent());
         firstPost.setPostedByUserId(userId);
         firstPost.setPostDate(new Date());
@@ -90,10 +90,6 @@ public class TopicController {
         topic.setViews(1);
         datastore.save(topic);
 
-        forum.setPosts(forum.getPosts() + 1);
-        forum.setActivity(forum.getActivity() + score);
-        datastore.save(forum);
-
         ForumWatch forumWatch = datastore.find(ForumWatch.class).field("forumId").equal(forum.getId())
                 .field("userId").equal(userId).get();
         if (forumWatch == null) {
@@ -103,10 +99,13 @@ public class TopicController {
             forumWatch.setPosts(1);
             forumWatch.setScore(score);
             forumWatch.setLevel(ForumService.getLeveByScore(forumWatch.getScore()));
-            forumWatch.setAdmin(false);
             forumWatch.setJoinDate(new Date());
             forumWatch.setLastPostDate(new Date());
+            forumWatch.setAdmin(false);
             forumWatch.setDeleted(false);
+
+            forum.setWatch((int)datastore.createQuery(ForumWatch.class).field("forumId").equal(forum.getId())
+                    .field("userId").equal(userId).field("deleted").equal(false).countAll());
         } else {
             forumWatch.setPosts(forumWatch.getPosts() + 1);
             forumWatch.setLastPostDate(new Date());
@@ -114,6 +113,10 @@ public class TopicController {
             forumWatch.setLevel(ForumService.getLeveByScore(forumWatch.getScore()));
         }
         datastore.save(forumWatch);
+
+        forum.setPosts(forum.getPosts() + 1);
+        forum.setActivity(forum.getActivity() + score);
+        datastore.save(forum);
 
         return Response.ok().build();
     }
@@ -136,6 +139,64 @@ public class TopicController {
         }
 
         topic.setDeleted(true);
+        datastore.save(topic);
+
+        return Response.ok().build();
+    }
+
+    @GET
+    @Path("{id}/pinTop")
+    public Response pinTop(@Context SecurityContext securityContext, @PathParam("id") String topicId) {
+        UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
+        ObjectId userId = userPrincipal.getId();
+        Datastore datastore = MorphiaHelper.getDatastore();
+
+        Topic topic = datastore.find(Topic.class).field("id").equal(new ObjectId(topicId)).get();
+        if (topic == null || topic.isDeleted()) {
+            throw new BadRequestException("主题不存在或已被删除");
+        }
+
+        Forum forum = datastore.find(Forum.class).field("id").equal(topic.getForumId()).get();
+        if (forum == null || forum.isDeleted()) {
+            throw new BadRequestException("论坛不存在或此论坛已删除");
+        }
+
+        ForumWatch forumWatch = datastore.find(ForumWatch.class).field("forumId").equal(forum.getId())
+                .field("userId").equal(userId).get();
+        if (forumWatch == null || !forumWatch.isAdmin()) {
+            throw new BadRequestException("您无权进行此操作");
+        }
+
+        topic.setOnTop(true);
+        datastore.save(topic);
+
+        return Response.ok().build();
+    }
+
+    @GET
+    @Path("{id}/unpinTop")
+    public Response unpinTop(@Context SecurityContext securityContext, @PathParam("id") String topicId) {
+        UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
+        ObjectId userId = userPrincipal.getId();
+        Datastore datastore = MorphiaHelper.getDatastore();
+
+        Topic topic = datastore.find(Topic.class).field("id").equal(new ObjectId(topicId)).get();
+        if (topic == null || topic.isDeleted()) {
+            throw new BadRequestException("主题不存在或已被删除");
+        }
+
+        Forum forum = datastore.find(Forum.class).field("id").equal(topic.getForumId()).get();
+        if (forum == null || forum.isDeleted()) {
+            throw new BadRequestException("论坛不存在或此论坛已删除");
+        }
+
+        ForumWatch forumWatch = datastore.find(ForumWatch.class).field("forumId").equal(forum.getId())
+                .field("userId").equal(userId).get();
+        if (forumWatch == null || !forumWatch.isAdmin()) {
+            throw new BadRequestException("您无权进行此操作");
+        }
+
+        topic.setOnTop(false);
         datastore.save(topic);
 
         return Response.ok().build();

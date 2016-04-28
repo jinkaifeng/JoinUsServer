@@ -26,14 +26,14 @@ public class MorphiaHelper {
             // can be called multiple times with different packages or classes
             morphia.mapPackage("com.northgatecode.joinus.mongodb");
 
-            ServerAddress serverAddress = new ServerAddress("127.0.0.1", 27017);
+            ServerAddress serverAddress = new ServerAddress("120.27.140.162", 27017);
 
-//            List<MongoCredential> credentialsList = new ArrayList<MongoCredential>();
-//            MongoCredential credentia = MongoCredential.createCredential(
-//                    "username", "dbname", "password".toCharArray());
-//            credentialsList.add(credentia);
+            List<MongoCredential> credentialsList = new ArrayList<>();
+            MongoCredential credential = MongoCredential.createCredential(
+                    "joinus", "joinus", "joinUS123".toCharArray());
+            credentialsList.add(credential);
 
-            client = new MongoClient(serverAddress);
+            client = new MongoClient(serverAddress, credentialsList);
 
         } catch (ExceptionInInitializerError e) {
             throw e;

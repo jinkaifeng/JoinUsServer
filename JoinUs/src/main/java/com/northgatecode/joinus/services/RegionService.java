@@ -21,18 +21,18 @@ public class RegionService {
 
         if (provinceList == null) {
             provinceList = new ProvinceList();
-            provinceList.setProvinces(new ArrayList<ProvinceItem>());
+            provinceList.setProvinceItems(new ArrayList<ProvinceItem>());
 
             Datastore datastore = MorphiaHelper.getDatastore();
             List<Province> provinces = datastore.createQuery(Province.class).asList();
             for (Province province : provinces) {
                 ProvinceItem provinceItem = new ProvinceItem(province);
-                provinceItem.setCities(new ArrayList<CityItem>());
+                provinceItem.setCityItems(new ArrayList<CityItem>());
                 List<City> cities = datastore.createQuery(City.class).field("provinceId").equal(province.getId()).asList();
                 for (City city : cities) {
-                    provinceItem.getCities().add(new CityItem(city));
+                    provinceItem.getCityItems().add(new CityItem(city));
                 }
-                provinceList.getProvinces().add(provinceItem);
+                provinceList.getProvinceItems().add(provinceItem);
             }
 
             JedisHelper.set("provinceList", provinceList, 60 * 60);

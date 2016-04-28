@@ -81,6 +81,10 @@ public class ReplyController {
             forumWatch.setJoinDate(new Date());
             forumWatch.setLastPostDate(new Date());
             forumWatch.setDeleted(false);
+
+            forum.setWatch((int)datastore.createQuery(ForumWatch.class).field("forumId").equal(forum.getId())
+                    .field("userId").equal(userId).field("deleted").equal(false).countAll());
+
         } else {
             forumWatch.setPosts(forumWatch.getPosts() + 1);
             forumWatch.setLastPostDate(new Date());

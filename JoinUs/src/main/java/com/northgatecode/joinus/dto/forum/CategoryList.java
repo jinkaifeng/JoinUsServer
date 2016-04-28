@@ -8,20 +8,20 @@ import java.util.List;
  * Created by qianliang on 3/4/2016.
  */
 public class CategoryList {
-    private List<Category> list;
+    private List<Category> categories;
 
     public CategoryList() {
     }
 
-    public CategoryList(List<Category> list) {
-        this.list = list;
+    public CategoryList(List<Category> categories) {
+        this.categories = categories;
     }
 
-    public List<Category> getList() {
-        return list;
+    public List<Category> getCategories() {
+        return categories;
     }
 
-    public void setList(List<Category> list) {
-        this.list = list;
+    public void setCategories(List<Category> categories) {
+        this.categories = categories;
     }
 }

@@ -56,7 +56,7 @@ public class PostController {
         int score = 5;
 
         Post post = new Post();
-        post.setTopicId(postAdd.getTopicId());
+        post.setTopicId(topic.getId());
         post.setForumId(forum.getId());
         post.setContent(postAdd.getContent());
         post.setPostedByUserId(userId);
@@ -74,15 +74,6 @@ public class PostController {
             }
         }
 
-        topic.setPosts(topic.getPosts() + 1);
-        topic.setLastPostId(post.getId());
-        topic.setLastPostDate(post.getPostDate());
-        datastore.save(topic);
-
-        forum.setPosts(forum.getPosts() + 1);
-        forum.setActivity(forum.getActivity() + 5);
-        datastore.save(forum);
-
         // poster
         ForumWatch forumWatch = datastore.find(ForumWatch.class).field("forumId").equal(forum.getId())
                 .field("userId").equal(userId).get();
@@ -97,6 +88,9 @@ public class PostController {
             forumWatch.setJoinDate(new Date());
             forumWatch.setLastPostDate(new Date());
             forumWatch.setDeleted(false);
+
+            forum.setWatch((int)datastore.createQuery(ForumWatch.class).field("forumId").equal(forum.getId())
+                    .field("userId").equal(userId).field("deleted").equal(false).countAll());
         } else {
             forumWatch.setPosts(forumWatch.getPosts() + 1);
             forumWatch.setLastPostDate(new Date());
@@ -113,6 +107,15 @@ public class PostController {
             ownerForumWatch.setLevel(ForumService.getLeveByScore(forumWatch.getScore()));
             datastore.save(ownerForumWatch);
         }
+
+        topic.setPosts(topic.getPosts() + 1);
+        topic.setLastPostId(post.getId());
+        topic.setLastPostDate(post.getPostDate());
+        datastore.save(topic);
+
+        forum.setPosts(forum.getPosts() + 1);
+        forum.setActivity(forum.getActivity() + 5);
+        datastore.save(forum);
 
         return Response.ok().build();
     }

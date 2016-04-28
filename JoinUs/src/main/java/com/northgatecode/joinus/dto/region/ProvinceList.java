@@ -6,13 +6,13 @@ import java.util.List;
  * Created by qianliang on 8/4/2016.
  */
 public class ProvinceList {
-    private List<ProvinceItem> provinces;
+    private List<ProvinceItem> provinceItems;
 
-    public List<ProvinceItem> getProvinces() {
-        return provinces;
+    public List<ProvinceItem> getProvinceItems() {
+        return provinceItems;
     }
 
-    public void setProvinces(List<ProvinceItem> provinces) {
-        this.provinces = provinces;
+    public void setProvinceItems(List<ProvinceItem> provinceItems) {
+        this.provinceItems = provinceItems;
     }
 }

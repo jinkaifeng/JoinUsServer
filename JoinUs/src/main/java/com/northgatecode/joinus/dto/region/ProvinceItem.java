@@ -10,7 +10,7 @@ import java.util.List;
 public class ProvinceItem {
     private int id;
     private String name;
-    private List<CityItem> cities;
+    private List<CityItem> cityItems;
 
     public ProvinceItem() {
     }
@@ -36,11 +36,11 @@ public class ProvinceItem {
         this.name = name;
     }
 
-    public List<CityItem> getCities() {
-        return cities;
+    public List<CityItem> getCityItems() {
+        return cityItems;
     }
 
-    public void setCities(List<CityItem> cities) {
-        this.cities = cities;
+    public void setCityItems(List<CityItem> cityItems) {
+        this.cityItems = cityItems;
     }
 }
