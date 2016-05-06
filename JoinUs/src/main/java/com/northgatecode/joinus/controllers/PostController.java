@@ -65,13 +65,11 @@ public class PostController {
         datastore.save(post);
 
         for (ObjectId imageId : postAdd.getImageIds()) {
-            if (ImageService.addDimensions(imageId, new int[]{240, 120})) {
-                PostImage postImage = new PostImage();
-                postImage.setPostId(post.getId());
-                postImage.setImageId(imageId);
-                datastore.save(postImage);
-                score += 2;
-            }
+            PostImage postImage = new PostImage();
+            postImage.setPostId(post.getId());
+            postImage.setImageId(imageId);
+            datastore.save(postImage);
+            score += 2;
         }
 
         // poster
@@ -88,16 +86,18 @@ public class PostController {
             forumWatch.setJoinDate(new Date());
             forumWatch.setLastPostDate(new Date());
             forumWatch.setDeleted(false);
+            datastore.save(forumWatch);
 
             forum.setWatch((int)datastore.createQuery(ForumWatch.class).field("forumId").equal(forum.getId())
-                    .field("userId").equal(userId).field("deleted").equal(false).countAll());
+                    .field("deleted").equal(false).countAll());
         } else {
             forumWatch.setPosts(forumWatch.getPosts() + 1);
             forumWatch.setLastPostDate(new Date());
             forumWatch.setScore(forumWatch.getScore() + score);
             forumWatch.setLevel(ForumService.getLeveByScore(forumWatch.getScore()));
+            datastore.save(forumWatch);
         }
-        datastore.save(forumWatch);
+
 
         // topic owner
         ForumWatch ownerForumWatch = datastore.find(ForumWatch.class).field("forumId").equal(forum.getId())
@@ -128,13 +128,14 @@ public class PostController {
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
         ObjectId userId = userPrincipal.getId();
         Datastore datastore = MorphiaHelper.getDatastore();
+        User user = datastore.createQuery(User.class).field("id").equal(userId).get();
 
         Post post = datastore.find(Post.class).field("id").equal(new ObjectId(postId)).get();
         if (post == null || post.isDeleted()) {
             throw new BadRequestException("帖子不存在或已被删除");
         }
 
-        if (post.getPostedByUserId() != userId) {
+        if (post.getPostedByUserId() != userId && user.getRoleId() < 100) {
             throw new BadRequestException("您无权删除此贴");
         }
 

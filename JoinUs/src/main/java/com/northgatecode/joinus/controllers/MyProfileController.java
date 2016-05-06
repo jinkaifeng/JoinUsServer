@@ -3,6 +3,7 @@ package com.northgatecode.joinus.controllers;
 import com.northgatecode.joinus.auth.Authenticated;
 import com.northgatecode.joinus.auth.UserPrincipal;
 import com.northgatecode.joinus.dto.Message;
+import com.northgatecode.joinus.dto.VerifyCode;
 import com.northgatecode.joinus.dto.region.CityItem;
 import com.northgatecode.joinus.dto.region.ProvinceItem;
 import com.northgatecode.joinus.dto.region.ProvinceList;
@@ -14,7 +15,6 @@ import com.northgatecode.joinus.services.UserService;
 import com.northgatecode.joinus.services.VerifyCodeService;
 import com.northgatecode.joinus.utils.MorphiaHelper;
 import com.northgatecode.joinus.utils.Utils;
-import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -22,7 +22,6 @@ import org.apache.commons.lang3.RandomUtils;
 import org.bson.types.ObjectId;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.hibernate.dialect.function.NoArgSQLFunction;
 import org.mongodb.morphia.Datastore;
 
 import javax.imageio.ImageIO;
@@ -55,7 +54,7 @@ public class MyProfileController {
     public Response getMyProfile(@Context SecurityContext securityContext) {
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
         ObjectId userId = userPrincipal.getId();
-        User user = UserService.getById(userId);
+        User user = MorphiaHelper.getDatastore().find(User.class).field("id").equal(userId).get();
         return Response.ok(new UserProfile(user)).build();
     }
 
@@ -65,30 +64,16 @@ public class MyProfileController {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updatePhoto(@Context SecurityContext securityContext, @FormDataParam("file") InputStream fileInputStream,
-                                @FormDataParam("file") FormDataContentDisposition fileMetaData) throws IOException {
+                                @FormDataParam("file") FormDataContentDisposition fileMetaData) {
 
         if (!FilenameUtils.getExtension(fileMetaData.getFileName()).toLowerCase().equals("jpg")) {
             throw new BadRequestException("JPG file only");
         }
 
-        String imageName = UUID.randomUUID().toString();
-        String fullPath = FilenameUtils.concat( Utils.getUploadFolder(), imageName + ".jpg");
-
-        OutputStream out = new FileOutputStream(fullPath);
-        int read;
-        byte[] bytes = new byte[1024];
-        while ((read = fileInputStream.read(bytes)) != -1) {
-            out.write(bytes, 0, read);
-        }
-        out.flush();
-        out.close();
-
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
         ObjectId userId = userPrincipal.getId();
 
-        Image image = ImageService.saveImage(imageName, userId);
-
-        ImageService.addDimensions(image.getId(), new int[]{320, 160, 80});
+        Image image = ImageService.saveUploadImage(fileInputStream, userId);
 
         Datastore datastore = MorphiaHelper.getDatastore();
         User user = datastore.find(User.class).field("id").equal(userId).get();
@@ -99,10 +84,44 @@ public class MyProfileController {
         return Response.ok(new UserProfile(user)).build();
     }
 
+    @GET
+    @Path("updateMobileVerifyCode/{mobile}")
+    @Authenticated
+    public Response getUpdateMobileVerifyCode(@PathParam("mobile") String mobile) {
+
+        // check is valid mobile number
+        if (!Utils.isValidMobile(mobile)) {
+            new BadRequestException("无效的手机号码");
+        }
+        // check same number
+        List<User> sameMobileUsers = MorphiaHelper.getDatastore().createQuery(User.class)
+                .field("mobile").equalIgnoreCase(mobile).asList();
+
+        if (sameMobileUsers.size() > 0) {
+            throw new BadRequestException("此号码已使用.");
+        }
+
+        VerifyCodeService.generateCodeAndSendSMS(mobile, "updateMobile");
+
+        return Response.ok(new Message("验证码已发送")).build();
+    }
+
     @POST
     @Path("mobile")
     @Authenticated
     public Response updateMobile(@Context SecurityContext securityContext, MobileVerifyCode mobileVerifyCode) {
+
+        if (!Utils.isValidMobile(mobileVerifyCode.getMobile())) {
+            new BadRequestException("无效的手机号码");
+        }
+
+        // check same number
+        List<User> sameMobileUsers = MorphiaHelper.getDatastore().createQuery(User.class)
+                .field("mobile").equalIgnoreCase(mobileVerifyCode.getMobile()).asList();
+
+        if (sameMobileUsers.size() > 0) {
+            throw new BadRequestException("此号码已使用.");
+        }
 
         if (!VerifyCodeService.verify(mobileVerifyCode.getMobile(), "updateMobile", mobileVerifyCode.getVerifyCode())) {
             throw new BadRequestException("验证码错误");
@@ -115,6 +134,61 @@ public class MyProfileController {
 
         user.setMobile(mobileVerifyCode.getMobile());
         user.setLastUpdateDate(new Date());
+        datastore.save(user);
+
+        return Response.ok(new UserProfile(user)).build();
+    }
+
+    @GET
+    @Path("updateEmailVerifyCode/{email}")
+    @Authenticated
+    public Response getUpdateEmailVerifyCode(@PathParam("email") String email) {
+
+        if (!Utils.isValidEmail(email)) {
+            new BadRequestException("无效的邮箱");
+        }
+
+        // check same number
+        List<User> sameMobileUsers = MorphiaHelper.getDatastore().createQuery(User.class)
+                .field("email").equalIgnoreCase(email).asList();
+
+        if (sameMobileUsers.size() > 0) {
+            throw new BadRequestException("此邮箱已使用");
+        }
+
+        VerifyCodeService.generateCodeAndSendEmail(email, "updateEmail");
+
+        return Response.ok(new Message("验证码已发送")).build();
+    }
+
+    @POST
+    @Path("email")
+    @Authenticated
+    public Response updateEmail(@Context SecurityContext securityContext, EmailVerifyCode emailVerifyCode) {
+        UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
+        ObjectId userId = userPrincipal.getId();
+
+        if (!Utils.isValidEmail(emailVerifyCode.getEmail())) {
+            throw new BadRequestException("无效的邮箱地址");
+        }
+
+        List<User> sameEmailUsers = MorphiaHelper.getDatastore().createQuery(User.class)
+                .field("email").equalIgnoreCase(emailVerifyCode.getEmail()).asList();
+
+        if (sameEmailUsers.size() > 0) {
+            throw new BadRequestException("此邮箱已使用");
+        }
+
+        if (!VerifyCodeService.verify(emailVerifyCode.getEmail(), "updateEmail", emailVerifyCode.getVerifyCode())) {
+            throw new BadRequestException("验证码错误");
+        }
+
+        Datastore datastore = MorphiaHelper.getDatastore();
+
+        User user = datastore.find(User.class).field("id").equal(userId).get();
+        user.setEmail(emailVerifyCode.getEmail().toLowerCase());
+        user.setLastUpdateDate(new Date());
+
         datastore.save(user);
 
         return Response.ok(new UserProfile(user)).build();
@@ -135,9 +209,6 @@ public class MyProfileController {
             throw new BadRequestException("原密码错误");
         }
         // validate password
-//        String regex = "^[a-zA-Z0-9-_]{4,16}$";
-//        Pattern pattern = Pattern.compile(regex);
-//        Matcher matcher = pattern.matcher(user.getPassword());
         if (userPassword.getPassword().length() < 4) {
             throw new BadRequestException("无效的新密码");
         }
@@ -147,32 +218,6 @@ public class MyProfileController {
 
         user.setPassword(hashedPassword);
         user.setSalt(salt);
-        user.setLastUpdateDate(new Date());
-
-        datastore.save(user);
-
-
-        return Response.ok().build();
-    }
-
-    @POST
-    @Path("email")
-    @Authenticated
-    public Response updateEmail(@Context SecurityContext securityContext, UserEmail userEmail) {
-        UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
-        ObjectId userId = userPrincipal.getId();
-
-        String regex = "^[\\w!#$%&'*+/=?`{|}~^-]+(?:\\.[\\w!#$%&'*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(userEmail.getEmail());
-        if (!matcher.matches()) {
-            throw new BadRequestException("无效的邮箱地址");
-        }
-
-        Datastore datastore = MorphiaHelper.getDatastore();
-
-        User user = datastore.find(User.class).field("id").equal(userId).get();
-        user.setEmail(userEmail.getEmail());
         user.setLastUpdateDate(new Date());
 
         datastore.save(user);
@@ -290,7 +335,7 @@ public class MyProfileController {
     @POST
     @Path("city")
     @Authenticated
-    public Response updatePhoto(@Context SecurityContext securityContext, UserCity userCity) {
+    public Response updateCity(@Context SecurityContext securityContext, UserCity userCity) {
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
         ObjectId userId = userPrincipal.getId();
 
@@ -307,5 +352,61 @@ public class MyProfileController {
         datastore.save(user);
 
         return Response.ok(new UserProfile(user)).build();
+    }
+
+    @GET
+    @Path("mobileVerifyCode")
+    @Authenticated
+    public Response getMobileVerifyCode(@Context SecurityContext securityContext) {
+        UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
+        ObjectId userId = userPrincipal.getId();
+
+        Datastore datastore = MorphiaHelper.getDatastore();
+
+        User user = datastore.find(User.class).field("id").equal(userId).get();
+        if (user.getMobile() == null || !Utils.isValidMobile(user.getMobile())) {
+            throw new BadRequestException("您还没有设置有效的手机号码");
+        }
+        VerifyCodeService.generateCodeAndSendSMS(user.getMobile(), "verifyMe");
+        return Response.ok(new Message("验证码已发送, 有效期5分钟.")).build();
+    }
+
+    @POST
+    @Path("verifyMobile")
+    @Authenticated
+    public Response verifyMobile(@Context SecurityContext securityContext, VerifyCode verifyCode){
+        User user = UserService.getUserFromContext(securityContext);
+        if (!VerifyCodeService.verify(user.getMobile(), "verifyMe", verifyCode.getVerifyCode())) {
+            throw new BadRequestException("验证码错误");
+        }
+        return Response.ok(new Message("验证成功")).build();
+    }
+
+    @GET
+    @Path("emailVerifyCode")
+    @Authenticated
+    public Response getEmailVerifyCode(@Context SecurityContext securityContext) {
+        UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
+        ObjectId userId = userPrincipal.getId();
+
+        Datastore datastore = MorphiaHelper.getDatastore();
+
+        User user = datastore.find(User.class).field("id").equal(userId).get();
+        if (user.getEmail() == null || !Utils.isValidEmail(user.getEmail())) {
+            throw new BadRequestException("您还没有设置有效的邮箱");
+        }
+        VerifyCodeService.generateCodeAndSendEmail(user.getEmail(), "verifyMe");
+        return Response.ok(new Message("验证码已发送, 有效期5分钟.")).build();
+    }
+
+    @POST
+    @Path("verifyEmail")
+    @Authenticated
+    public Response verifyEmail(@Context SecurityContext securityContext, VerifyCode verifyCode){
+        User user = UserService.getUserFromContext(securityContext);
+        if (!VerifyCodeService.verify(user.getEmail(), "verifyMe", verifyCode.getVerifyCode())) {
+            throw new BadRequestException("验证码错误");
+        }
+        return Response.ok(new Message("验证成功")).build();
     }
 }

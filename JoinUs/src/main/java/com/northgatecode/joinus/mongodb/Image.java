@@ -17,12 +17,8 @@ public class Image {
     private ObjectId id;
     private String name;
     private String extension;
-    private int width;
-    private int height;
-    private long size;
     private ObjectId uploadedBy;
     private Date uploadDate;
-    private List<String> dimensions;
 
     public ObjectId getId() {
         return id;
@@ -48,30 +44,6 @@ public class Image {
         this.extension = extension;
     }
 
-    public int getWidth() {
-        return width;
-    }
-
-    public void setWidth(int width) {
-        this.width = width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-
-    public long getSize() {
-        return size;
-    }
-
-    public void setSize(long size) {
-        this.size = size;
-    }
-
     public ObjectId getUploadedBy() {
         return uploadedBy;
     }
@@ -86,13 +58,5 @@ public class Image {
 
     public void setUploadDate(Date uploadDate) {
         this.uploadDate = uploadDate;
-    }
-
-    public List<String> getDimensions() {
-        return dimensions;
-    }
-
-    public void setDimensions(List<String> dimensions) {
-        this.dimensions = dimensions;
     }
 }

@@ -60,13 +60,15 @@ public class ForumController {
         ObjectId userId = userPrincipal.getId();
 
         Datastore datastore = MorphiaHelper.getDatastore();
-        List<ForumWatch> forumWatches = datastore.createQuery(ForumWatch.class).field("userId").equal(userId).order("-lastPostDate").offset(offset).limit(limit).asList();
+        List<ForumWatch> forumWatches = datastore.createQuery(ForumWatch.class).field("userId").equal(userId)
+                .order("-lastPostDate").offset(offset).limit(limit).asList();
         List<ObjectId> forumIds = new ArrayList<>();
         for (ForumWatch forumWatch : forumWatches) {
             forumIds.add(forumWatch.getForumId());
         }
 
-        List<Forum> forums = datastore.createQuery(Forum.class).field("id").in(forumIds).asList();
+        List<Forum> forums = datastore.createQuery(Forum.class).field("id").in(forumIds).field("deleted").equal(false)
+                .offset(offset).limit(limit).asList();
         return Response.ok(new ForumListLimited(forums, offset, limit)).build();
     }
 
@@ -78,7 +80,8 @@ public class ForumController {
         ObjectId userId = userPrincipal.getId();
 
         Datastore datastore = MorphiaHelper.getDatastore();
-        List<Forum> forums = datastore.createQuery(Forum.class).field("createdByUserId").equal(userId).field("deleted").notEqual(true).order("-activity").offset(offset).limit(limit).asList();
+        List<Forum> forums = datastore.createQuery(Forum.class).field("createdByUserId").equal(userId)
+                .field("deleted").notEqual(true).order("-activity").offset(offset).limit(limit).asList();
 
         return Response.ok(new ForumListLimited(forums, offset, limit)).build();
     }
@@ -178,8 +181,6 @@ public class ForumController {
         forum.setCategories(categories);
         datastore.save(forum);
 
-        ImageService.addDimensions(forum.getIconImageId(), new int[]{240, 120});
-
         ForumWatch forumWatch = new ForumWatch();
         forumWatch.setForumId(forum.getId());
         forumWatch.setUserId(userId);
@@ -188,6 +189,7 @@ public class ForumController {
         forumWatch.setLevel(ForumService.getLeveByScore(forumWatch.getScore()));
         forumWatch.setAdmin(true);
         forumWatch.setJoinDate(new Date());
+        forumWatch.setLastPostDate(new Date());
         forumWatch.setDeleted(false);
         datastore.save(forumWatch);
 
@@ -209,11 +211,13 @@ public class ForumController {
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
         ObjectId userId = userPrincipal.getId();
         Datastore datastore = MorphiaHelper.getDatastore();
+        User user = datastore.createQuery(User.class).field("id").equal(userId).get();
+
         Forum forum = datastore.createQuery(Forum.class).field("id").equal(new ObjectId(forumId)).get();
         if (forum == null) {
             throw new BadRequestException("您要删除的论坛不存在");
         }
-        if (!forum.getCreatedByUserId().equals(userId)) {
+        if (!forum.getCreatedByUserId().equals(userId) && user.getRoleId() < 100 ) {
             throw new BadRequestException("您无权删除此论坛");
         }
         forum.setDeleted(true);
@@ -230,12 +234,12 @@ public class ForumController {
         ObjectId userId = userPrincipal.getId();
         Datastore datastore = MorphiaHelper.getDatastore();
 
-        Forum forum = datastore.createQuery(Forum.class).field("id").equal(forumId).get();
+        Forum forum = datastore.createQuery(Forum.class).field("id").equal(new ObjectId(forumId)).get();
         if (forum == null || forum.isDeleted()) {
             throw new BadRequestException("您要关注的论坛不存在或已经删除");
         }
 
-        ForumWatch forumWatch = datastore.find(ForumWatch.class).field("forumId").equal(forumId)
+        ForumWatch forumWatch = datastore.find(ForumWatch.class).field("forumId").equal(forum.getId())
                 .field("userId").equal(userId).get();
         if (forumWatch == null) {
 
@@ -252,15 +256,17 @@ public class ForumController {
             }
             forumWatch.setJoinDate(new Date());
             forumWatch.setDeleted(false);
+            datastore.save(forumWatch);
 
             forum.setWatch((int)datastore.createQuery(ForumWatch.class).field("forumId").equal(forum.getId())
-                    .field("userId").equal(userId).field("deleted").equal(false).countAll());
+                    .field("deleted").equal(false).countAll());
             datastore.save(forum);
 
         } else {
             forumWatch.setDeleted(false);
+            datastore.save(forumWatch);
         }
-        datastore.save(forumWatch);
+
 
         return Response.ok().build();
     }
@@ -273,19 +279,19 @@ public class ForumController {
         ObjectId userId = userPrincipal.getId();
         Datastore datastore = MorphiaHelper.getDatastore();
 
-        Forum forum = datastore.createQuery(Forum.class).field("id").equal(forumId).get();
+        Forum forum = datastore.createQuery(Forum.class).field("id").equal(new ObjectId(forumId)).get();
         if (forum == null || forum.isDeleted()) {
             throw new BadRequestException("您要取消关注的论坛不存在或已经删除");
         }
 
-        ForumWatch forumWatch = datastore.find(ForumWatch.class).field("forumId").equal(forumId)
+        ForumWatch forumWatch = datastore.find(ForumWatch.class).field("forumId").equal(forum.getId())
                 .field("userId").equal(userId).get();
         if (forumWatch != null) {
             forumWatch.setDeleted(true);
             datastore.save(forumWatch);
 
             forum.setWatch((int)datastore.createQuery(ForumWatch.class).field("forumId").equal(forum.getId())
-                    .field("userId").equal(userId).field("deleted").equal(false).countAll());
+                    .field("deleted").equal(false).countAll());
             datastore.save(forum);
         }
 
@@ -304,6 +310,20 @@ public class ForumController {
         List<Topic> topics = datastore.createQuery(Topic.class).field("forumId").equal(forum.getId())
                 .field("deleted").equal(false).order("onTop").order("-lastPostDate").offset(offset).limit(limit).asList();
         return Response.ok(new TopicListLimited(forum, topics, offset, limit)).build();
+    }
+
+    @GET
+    @Path("{id}/updateWatch")
+    public Response updateWatch(@PathParam("id") String forumId) {
+        Datastore datastore = MorphiaHelper.getDatastore();
+        Forum forum = datastore.find(Forum.class).field("id").equal(new ObjectId(forumId)).get();
+        if (forum == null || forum.isDeleted()) {
+            throw new BadRequestException("论坛不存在或此论坛已删除");
+        }
+        forum.setWatch((int)datastore.createQuery(ForumWatch.class).field("forumId").equal(forum.getId())
+                .field("deleted").equal(false).countAll());
+        datastore.save(forum);
+        return Response.ok().build();
     }
 
 }

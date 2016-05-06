@@ -1,19 +1,34 @@
 package com.northgatecode.joinus.controllers;
 
+import com.aliyuncs.DefaultAcsClient;
+import com.aliyuncs.IAcsClient;
+import com.aliyuncs.dm.model.v20151123.SingleSendMailRequest;
+import com.aliyuncs.dm.model.v20151123.SingleSendMailResponse;
+import com.aliyuncs.exceptions.ClientException;
+import com.aliyuncs.exceptions.ServerException;
+import com.aliyuncs.profile.DefaultProfile;
+import com.aliyuncs.profile.IClientProfile;
+
 import com.mongodb.MongoClient;
 import com.northgatecode.joinus.auth.Authenticated;
+import com.northgatecode.joinus.dto.CodeMessage;
 import com.northgatecode.joinus.mongodb.*;
+import com.northgatecode.joinus.providers.GsonMessageBodyHandler;
 import com.northgatecode.joinus.utils.JpaHelper;
 import com.northgatecode.joinus.utils.MorphiaHelper;
+import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.lang.RandomStringUtils;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 
-import javax.persistence.EntityManager;
 import javax.ws.rs.*;
+import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by qianliang on 19/3/2016.
@@ -43,6 +58,37 @@ public class TestController {
     }
 
     @GET
+    @Path("countries")
+    public Response getForums(@QueryParam("search") String search) {
+
+        Datastore datastore = MorphiaHelper.getDatastore();
+        List<Country> countries;
+        if (search != null && search.length() > 0) {
+            countries = datastore.createQuery(Country.class).field("name").containsIgnoreCase(search).order("name").asList();
+        } else {
+            countries = datastore.createQuery(Country.class).order("name").asList();
+        }
+
+        return Response.ok(countries).build();
+    }
+
+    @POST
+    @Path("sendSMS")
+    @Produces(MediaType.APPLICATION_JSON)
+    public CodeMessage sendSMS() {
+        CodeMessage message = ClientBuilder.newClient().register(GsonMessageBodyHandler.class).target("http://api.weimi.cc/2/sms/send.html")
+                .queryParam("uid", "GM9NRw5jBz0m")
+                .queryParam("pas", "mm4bypzs")
+                .queryParam("mob", "18637800688")
+                .queryParam("cid", "b77b4s65tjjU")
+                .queryParam("p1", "-Join Us-")
+                .queryParam("p2", RandomStringUtils.randomNumeric(6))
+                .queryParam("type", "json")
+                .request(MediaType.APPLICATION_JSON_TYPE).get(CodeMessage.class);
+        return message;
+    }
+
+    @GET
     @Path("initDB")
     @Produces(MediaType.TEXT_PLAIN)
     public String initdb() {
@@ -52,6 +98,7 @@ public class TestController {
         datastore.save(new Role(2, "注册用户"));
         datastore.save(new Role(3, "付费用户"));
         datastore.save(new Role(8, "VIP用户"));
+        datastore.save(new Role(100, "系统管理"));
 
         datastore.save(new Gender(1, "保密"));
         datastore.save(new Gender(2, "男"));

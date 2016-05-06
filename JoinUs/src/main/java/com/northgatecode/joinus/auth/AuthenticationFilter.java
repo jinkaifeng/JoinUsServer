@@ -1,8 +1,7 @@
 package com.northgatecode.joinus.auth;
 
-import com.northgatecode.joinus.mongodb.Role;
 import com.northgatecode.joinus.mongodb.User;
-import com.northgatecode.joinus.services.UserService;
+import com.northgatecode.joinus.utils.MorphiaHelper;
 import org.bson.types.ObjectId;
 
 import javax.annotation.Priority;
@@ -41,7 +40,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             throw new NotAuthorizedException("Invalid user-id or security-token", Response.noContent());
         }
 
-        User user = UserService.getById(new ObjectId(userId));
+        User user = MorphiaHelper.getDatastore().find(User.class).field("id").equal(new ObjectId(userId)).get();
 
         if (user == null) {
             throw new NotAuthorizedException("user-id doesn't exist", Response.noContent());

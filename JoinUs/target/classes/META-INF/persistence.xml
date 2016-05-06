@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<persistence xmlns="http://java.sun.com/xml/ns/persistence"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
-             version="2.0">
-    <persistence-unit name="com.northgatecode.joinus.jpa">
-        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <properties>
-            <!--JDBC-->
-            <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
-            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/joinus?useSSL=false&amp;useUnicode=yes&amp;characterEncoding=UTF-8" />
-            <property name="javax.persistence.jdbc.user" value="joinus" />
-            <property name="javax.persistence.jdbc.password" value="joinUS123" />
+<!--<persistence xmlns="http://java.sun.com/xml/ns/persistence"-->
+             <!--xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
+             <!--xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"-->
+             <!--version="2.0">-->
+    <!--<persistence-unit name="com.northgatecode.joinus.jpa">-->
+        <!--<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>-->
+        <!--<properties>-->
+            <!--&lt;!&ndash;JDBC&ndash;&gt;-->
+            <!--<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />-->
+            <!--<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/joinus?useSSL=false&amp;useUnicode=yes&amp;characterEncoding=UTF-8" />-->
+            <!--<property name="javax.persistence.jdbc.user" value="joinus" />-->
+            <!--<property name="javax.persistence.jdbc.password" value="joinUS123" />-->
 
-            <!-- Hibernate properties -->
-            <property name="hibernate.show_sql" value="true" />
-            <property name="hibernate.format_sql" value="true" />
-            <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />
-            <property name="hibernate.hbm2ddl.auto" value="create" />
-            <!--create, update, validate-->
+            <!--&lt;!&ndash; Hibernate properties &ndash;&gt;-->
+            <!--<property name="hibernate.show_sql" value="true" />-->
+            <!--<property name="hibernate.format_sql" value="true" />-->
+            <!--<property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect" />-->
+            <!--<property name="hibernate.hbm2ddl.auto" value="create" />-->
+            <!--&lt;!&ndash;create, update, validate&ndash;&gt;-->
 
-            <!-- Configuring Connection Pool -->
-            <property name="hibernate.c3p0.min_size" value="0" />
-            <property name="hibernate.c3p0.max_size" value="5" />
-            <property name="hibernate.c3p0.timeout" value="500" />
-            <property name="hibernate.c3p0.max_statements" value="50" />
-            <property name="hibernate.c3p0.idle_test_period" value="2000" />
+            <!--&lt;!&ndash; Configuring Connection Pool &ndash;&gt;-->
+            <!--<property name="hibernate.c3p0.min_size" value="0" />-->
+            <!--<property name="hibernate.c3p0.max_size" value="5" />-->
+            <!--<property name="hibernate.c3p0.timeout" value="500" />-->
+            <!--<property name="hibernate.c3p0.max_statements" value="50" />-->
+            <!--<property name="hibernate.c3p0.idle_test_period" value="2000" />-->
 
-        </properties>
+        <!--</properties>-->
 
-    </persistence-unit>
-</persistence>
+    <!--</persistence-unit>-->
+<!--</persistence>-->
 

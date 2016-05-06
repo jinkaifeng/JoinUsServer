@@ -25,7 +25,7 @@ public class JedisHelper {
         config.setMaxIdle(2);
         config.setMinIdle(0);
         config.setBlockWhenExhausted(true);
-        this.jedisPool = new JedisPool(config, "localhost", 6379, 2000, "joinUS123");
+        this.jedisPool = new JedisPool(config, "localhost", 6379, 2000, Config.getReidsPassword());
     }
 
     final public static Jedis getResource() {

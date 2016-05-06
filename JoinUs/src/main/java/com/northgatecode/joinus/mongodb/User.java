@@ -10,7 +10,8 @@ import java.util.List;
  */
 @Entity(noClassnameStored = true)
 @Indexes({
-        @Index(fields = @Field(value = "mobile"), options = @IndexOptions(unique = true)),
+        @Index(fields = @Field(value = "mobile")),
+        @Index(fields = @Field(value = "email")),
         @Index(fields = @Field(value = "name"), options = @IndexOptions(unique = true))
 })
 public class User {

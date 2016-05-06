@@ -1,5 +1,7 @@
 package com.northgatecode.joinus.controllers;
 
+import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.model.ObjectMetadata;
 import com.northgatecode.joinus.auth.Authenticated;
 import com.northgatecode.joinus.auth.UserPrincipal;
 import com.northgatecode.joinus.dto.UploadImage;
@@ -32,34 +34,22 @@ import java.util.UUID;
  */
 @Path("upload")
 public class UploadController {
+
     @POST
     @Path("image")
     @Authenticated
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response uploadImage(@Context SecurityContext securityContext,@FormDataParam("file") InputStream fileInputStream,
-                                @FormDataParam("file") FormDataContentDisposition fileMetaData) throws Exception
-    {
+    public Response uploadJPG(@Context SecurityContext securityContext, @FormDataParam("file") InputStream fileInputStream,
+                                @FormDataParam("file") FormDataContentDisposition fileMetaData) throws Exception {
         if (!FilenameUtils.getExtension(fileMetaData.getFileName()).toLowerCase().equals("jpg")) {
             throw new BadRequestException("JPG file only");
         }
 
-        String imageName = UUID.randomUUID().toString();
-        String fullPath = FilenameUtils.concat( Utils.getUploadFolder(), imageName + ".jpg");
-
-        OutputStream out = new FileOutputStream(fullPath);
-        int read;
-        byte[] bytes = new byte[1024];
-        while ((read = fileInputStream.read(bytes)) != -1) {
-            out.write(bytes, 0, read);
-        }
-        out.flush();
-        out.close();
-
-        UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
+        UserPrincipal userPrincipal = (UserPrincipal)securityContext.getUserPrincipal();
         ObjectId userId = userPrincipal.getId();
 
-        Image image = ImageService.saveImage(imageName, userId);
+        Image image = ImageService.saveUploadImage(fileInputStream, userId);
 
         return Response.ok(new UploadImage(image.getId(), image.getName())).build();
     }

@@ -19,6 +19,7 @@ public class UserProfile {
     private ObjectId id;
     private String mobile;
     private String email;
+    private boolean isPasswordSet;
     private String name;
     private String photo;
     private Gender gender;
@@ -34,6 +35,7 @@ public class UserProfile {
         this.id = user.getId();
         this.mobile = user.getMobile();
         this.email = user.getEmail();
+        this.isPasswordSet = user.getPassword() != null && user.getPassword().length() > 0 ? true : false;
         this.name = user.getName();
         this.photo = ImageService.getImageName(user.getPhotoImageId());
         if (user.getCityId() != 0) {
@@ -73,6 +75,14 @@ public class UserProfile {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public boolean isPasswordSet() {
+        return isPasswordSet;
+    }
+
+    public void setPasswordSet(boolean passwordSet) {
+        isPasswordSet = passwordSet;
     }
 
     public String getName() {

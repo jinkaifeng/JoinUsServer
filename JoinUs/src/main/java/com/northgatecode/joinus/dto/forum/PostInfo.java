@@ -1,6 +1,5 @@
 package com.northgatecode.joinus.dto.forum;
 
-import com.northgatecode.joinus.dto.user.UserInfo;
 import com.northgatecode.joinus.mongodb.*;
 import com.northgatecode.joinus.utils.MorphiaHelper;
 import org.bson.types.ObjectId;
@@ -26,6 +25,7 @@ public class PostInfo {
         this.id = post.getId();
         this.postedBy = new ForumUserInfo(post.getPostedByUserId(), post.getForumId());
         this.content = post.getContent();
+        this.postDate = post.getPostDate();
         this.images = new ArrayList<>();
         List<PostImage> postImages = MorphiaHelper.getDatastore().createQuery(PostImage.class)
                 .field("postId").equal(post.getId()).asList();

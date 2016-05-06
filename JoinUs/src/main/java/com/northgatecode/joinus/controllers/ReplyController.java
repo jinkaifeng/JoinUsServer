@@ -81,17 +81,18 @@ public class ReplyController {
             forumWatch.setJoinDate(new Date());
             forumWatch.setLastPostDate(new Date());
             forumWatch.setDeleted(false);
+            datastore.save(forumWatch);
 
             forum.setWatch((int)datastore.createQuery(ForumWatch.class).field("forumId").equal(forum.getId())
-                    .field("userId").equal(userId).field("deleted").equal(false).countAll());
+                    .field("deleted").equal(false).countAll());
 
         } else {
             forumWatch.setPosts(forumWatch.getPosts() + 1);
             forumWatch.setLastPostDate(new Date());
             forumWatch.setScore(forumWatch.getScore() + 2);
             forumWatch.setLevel(ForumService.getLeveByScore(forumWatch.getScore()));
+            datastore.save(forumWatch);
         }
-        datastore.save(forumWatch);
 
         forum.setActivity(forum.getActivity() + 2);
         datastore.save(forum);

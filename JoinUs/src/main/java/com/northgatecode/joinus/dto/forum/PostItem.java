@@ -1,6 +1,5 @@
 package com.northgatecode.joinus.dto.forum;
 
-import com.northgatecode.joinus.dto.user.UserInfo;
 import com.northgatecode.joinus.mongodb.*;
 import com.northgatecode.joinus.utils.MorphiaHelper;
 import org.bson.types.ObjectId;

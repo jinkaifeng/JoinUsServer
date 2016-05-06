@@ -73,13 +73,11 @@ public class TopicController {
         datastore.save(firstPost);
 
         for (ObjectId imageId : topicAdd.getFirstPost().getImageIds()) {
-            if (ImageService.addDimensions(imageId, new int[]{240, 120})) {
-                PostImage postImage = new PostImage();
-                postImage.setPostId(firstPost.getId());
-                postImage.setImageId(imageId);
-                datastore.save(postImage);
-                score += 3;
-            }
+            PostImage postImage = new PostImage();
+            postImage.setPostId(firstPost.getId());
+            postImage.setImageId(imageId);
+            datastore.save(postImage);
+            score += 3;
         }
 
         topic.setFirstPostId(firstPost.getId());
@@ -103,16 +101,18 @@ public class TopicController {
             forumWatch.setLastPostDate(new Date());
             forumWatch.setAdmin(false);
             forumWatch.setDeleted(false);
+            datastore.save(forumWatch);
 
             forum.setWatch((int)datastore.createQuery(ForumWatch.class).field("forumId").equal(forum.getId())
-                    .field("userId").equal(userId).field("deleted").equal(false).countAll());
+                    .field("deleted").equal(false).countAll());
         } else {
             forumWatch.setPosts(forumWatch.getPosts() + 1);
             forumWatch.setLastPostDate(new Date());
             forumWatch.setScore(forumWatch.getScore() + score);
             forumWatch.setLevel(ForumService.getLeveByScore(forumWatch.getScore()));
+            datastore.save(forumWatch);
         }
-        datastore.save(forumWatch);
+
 
         forum.setPosts(forum.getPosts() + 1);
         forum.setActivity(forum.getActivity() + score);

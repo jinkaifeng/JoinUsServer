@@ -1,9 +1,6 @@
 package com.northgatecode.joinus.dto.forum;
 
-import com.northgatecode.joinus.dto.user.UserInfo;
 import org.bson.types.ObjectId;
-
-import java.util.Date;
 
 /**
  * Created by qianliang on 21/4/2016.
