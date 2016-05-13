@@ -11,6 +11,8 @@ import com.aliyuncs.profile.IClientProfile;
 
 import com.mongodb.MongoClient;
 import com.northgatecode.joinus.auth.Authenticated;
+import com.northgatecode.joinus.auth.TryAuthenticate;
+import com.northgatecode.joinus.auth.UserPrincipal;
 import com.northgatecode.joinus.dto.CodeMessage;
 import com.northgatecode.joinus.mongodb.*;
 import com.northgatecode.joinus.providers.GsonMessageBodyHandler;
@@ -55,6 +57,19 @@ public class TestController {
     @Produces(MediaType.TEXT_PLAIN)
     public String auth(@Context SecurityContext sc) {
         return "User Name:" + sc.getUserPrincipal().getName();
+    }
+
+    @GET
+    @Path("tryAuth")
+    @TryAuthenticate
+    @Produces(MediaType.TEXT_PLAIN)
+    public String tryAuth(@Context SecurityContext securityContext) {
+        UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
+        if (userPrincipal != null) {
+            return "User Name:" + userPrincipal.getName();
+        } else {
+            return "no user Principal";
+        }
     }
 
     @GET

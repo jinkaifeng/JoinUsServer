@@ -1,7 +1,6 @@
 package com.northgatecode.joinus.dto.forum;
 
-import com.northgatecode.joinus.mongodb.Post;
-import com.northgatecode.joinus.mongodb.Topic;
+import com.northgatecode.joinus.mongodb.*;
 import com.northgatecode.joinus.utils.MorphiaHelper;
 import org.bson.types.ObjectId;
 
@@ -21,23 +20,41 @@ public class TopicItem {
     private PostInfo lastPost;
     private Date lastPostDate;
     private boolean onTop;
+    private boolean deleteable;
 
     public TopicItem() {
     }
 
-    public TopicItem(Topic topic) {
+    public TopicItem(Topic topic, User user, ForumWatch forumWatch) {
         this.id = topic.getId();
         this.title = topic.getTitle();
         this.postedBy = new ForumUserInfo(topic.getPostedByUserId(), topic.getForumId());
         this.posts = topic.getPosts();
         this.views = topic.getViews();
         Post firstPost = MorphiaHelper.getDatastore().find(Post.class).field("id").equal(topic.getFirstPostId()).get();
-        this.firstPost = new PostInfo(firstPost);
+        this.firstPost = firstPost != null ? new PostInfo(firstPost) : null;
         this.firstPostDate = topic.getFirstPostDate();
         Post lastPost = MorphiaHelper.getDatastore().find(Post.class).field("id").equal(topic.getLastPostId()).get();
-        this.lastPost = new PostInfo(lastPost);
+        this.lastPost = lastPost != null ? new PostInfo(lastPost) : null;
         this.lastPostDate = topic.getLastPostDate();
         this.onTop = topic.isOnTop();
+        this.deleteable = false;
+        if (user != null) {
+
+            if (this.postedBy.getUserId().equals(user.getId())) {
+                this.deleteable = true;
+            }
+
+            if (user.getRoleId() >= 100) {
+                this.deleteable = true;
+            }
+
+            if (forumWatch != null && !forumWatch.isDeleted()) {
+                if (forumWatch.isAdmin()) {
+                    this.deleteable = true;
+                }
+            }
+        }
     }
 
     public ObjectId getId() {

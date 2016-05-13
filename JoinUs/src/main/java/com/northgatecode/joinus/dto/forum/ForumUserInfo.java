@@ -48,6 +48,24 @@ public class ForumUserInfo {
         }
     }
 
+    public ForumUserInfo(User user, ForumWatch forumWatch) {
+        Datastore datastore = MorphiaHelper.getDatastore();
+
+        this.userId = user.getId();
+        this.name = user.getName();
+        this.photo = ImageService.getImageName(user.getPhotoImageId());
+        if (user.getGenderId() != 0) {
+            this.gender = datastore.find(Gender.class).field("id").equal(user.getGenderId()).get();
+        }
+        this.registerDate = user.getRegisterDate();
+
+        this.level = forumWatch.getLevel();
+        this.posts = forumWatch.getPosts();
+        this.isAdmin = forumWatch.isAdmin();
+        this.joinDate = forumWatch.getJoinDate();
+        this.lastPostDate = forumWatch.getLastPostDate();
+    }
+
     public ObjectId getUserId() {
         return userId;
     }

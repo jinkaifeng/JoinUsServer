@@ -35,6 +35,10 @@ public class TopicController {
         ObjectId userId = userPrincipal.getId();
         Datastore datastore = MorphiaHelper.getDatastore();
 
+        if (topicAdd == null) {
+            throw new BadRequestException("主题不能为空");
+        }
+
         if (topicAdd.getForumId() == null) {
             throw new BadRequestException("必须提供有效的论坛Id");
         }
@@ -72,12 +76,17 @@ public class TopicController {
         firstPost.setDeleted(false);
         datastore.save(firstPost);
 
-        for (ObjectId imageId : topicAdd.getFirstPost().getImageIds()) {
-            PostImage postImage = new PostImage();
-            postImage.setPostId(firstPost.getId());
-            postImage.setImageId(imageId);
-            datastore.save(postImage);
-            score += 3;
+        if (topicAdd.getFirstPost().getImageIds() != null) {
+            for (ObjectId imageId : topicAdd.getFirstPost().getImageIds()) {
+                Image image = datastore.find(Image.class).field("id").equal(imageId).get();
+                if (image != null) {
+                    PostImage postImage = new PostImage();
+                    postImage.setPostId(firstPost.getId());
+                    postImage.setImageId(imageId);
+                    datastore.save(postImage);
+                    score += 3;
+                }
+            }
         }
 
         topic.setFirstPostId(firstPost.getId());
@@ -128,18 +137,28 @@ public class TopicController {
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
         ObjectId userId = userPrincipal.getId();
         Datastore datastore = MorphiaHelper.getDatastore();
+        User user = datastore.createQuery(User.class).field("id").equal(userId).get();
 
         Topic topic = datastore.find(Topic.class).field("id").equal(new ObjectId(topicId)).get();
         if (topic == null || topic.isDeleted()) {
             throw new BadRequestException("主题不存在或已被删除");
         }
 
-        if (topic.getPostedByUserId() != userId) {
-            throw new BadRequestException("您无权删除此主题");
+        Forum forum = datastore.find(Forum.class).field("id").equal(topic.getForumId()).get();
+        if (forum == null || forum.isDeleted()) {
+            throw new BadRequestException("论坛不存在或此论坛已删除");
         }
 
-        topic.setDeleted(true);
-        datastore.save(topic);
+        ForumWatch forumWatch = MorphiaHelper.getDatastore().find(ForumWatch.class)
+                .field("forumId").equal(forum.getId()).field("userId").equal(userId).get();
+
+        if (topic.getPostedByUserId().equals(userId) || user.getRoleId() >= 100
+                || forumWatch.isAdmin()) {
+            topic.setDeleted(true);
+            datastore.save(topic);
+        } else {
+            throw new BadRequestException("您无权删除此主题");
+        }
 
         return Response.ok().build();
     }

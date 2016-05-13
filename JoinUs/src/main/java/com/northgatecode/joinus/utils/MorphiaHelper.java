@@ -3,6 +3,7 @@ package com.northgatecode.joinus.utils;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoCredential;
 import com.mongodb.ServerAddress;
+import org.apache.commons.lang3.SystemUtils;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.mapping.Mapper;
@@ -33,7 +34,12 @@ public class MorphiaHelper {
             MongoCredential credential = MongoCredential.createCredential(
                     Config.getMongoDbUser(), "joinus", Config.getMongoDbPassword().toCharArray());
             credentialsList.add(credential);
-            ServerAddress serverAddress = new ServerAddress("120.27.140.162", 27017);
+            ServerAddress serverAddress;
+            if (SystemUtils.IS_OS_LINUX) {
+                serverAddress = new ServerAddress("127.0.0.1", 27017);
+            } else {
+                serverAddress = new ServerAddress("120.27.140.162", 27017);
+            }
             client = new MongoClient(serverAddress, credentialsList);
 
         } catch (ExceptionInInitializerError e) {

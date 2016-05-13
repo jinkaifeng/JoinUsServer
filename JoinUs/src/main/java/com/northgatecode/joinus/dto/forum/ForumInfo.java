@@ -1,7 +1,10 @@
 package com.northgatecode.joinus.dto.forum;
 
 import com.northgatecode.joinus.mongodb.Forum;
+import com.northgatecode.joinus.mongodb.ForumWatch;
+import com.northgatecode.joinus.mongodb.User;
 import com.northgatecode.joinus.services.ImageService;
+import com.northgatecode.joinus.utils.MorphiaHelper;
 import org.bson.types.ObjectId;
 
 import java.util.Date;
@@ -19,11 +22,17 @@ public class ForumInfo {
     private int activity;
     private ForumUserInfo createdBy;
     private Date createDate;
+    private boolean deleteable;
+    private ForumUserInfo watchedByMe;
 
     public ForumInfo() {
     }
 
     public ForumInfo(Forum forum) {
+        this(forum, null);
+    }
+
+    public ForumInfo(Forum forum, User user) {
         this.id = forum.getId();
         this.name = forum.getName();
         this.desc = forum.getDesc();
@@ -33,6 +42,19 @@ public class ForumInfo {
         this.activity = forum.getActivity();
         this.createdBy = new ForumUserInfo(forum.getCreatedByUserId(), forum.getId());
         this.createDate = forum.getCreateDate();
+
+        this.deleteable = false;
+        this.watchedByMe = null;
+        if (user != null) {
+
+            if (this.createdBy.getUserId().equals(user.getId())) {
+                this.deleteable = true;
+            }
+
+            if (user.getRoleId() >= 100) {
+                this.deleteable = true;
+            }
+        }
     }
 
     public ObjectId getId() {
@@ -106,4 +128,22 @@ public class ForumInfo {
     public void setCreateDate(Date createDate) {
         this.createDate = createDate;
     }
+
+    public boolean isDeleteable() {
+        return deleteable;
+    }
+
+    public void setDeleteable(boolean deleteable) {
+        this.deleteable = deleteable;
+    }
+
+    public ForumUserInfo getWatchedByMe() {
+        return watchedByMe;
+    }
+
+    public void setWatchedByMe(ForumUserInfo watchedByMe) {
+        this.watchedByMe = watchedByMe;
+    }
+
+
 }

@@ -1,7 +1,10 @@
 package com.northgatecode.joinus.dto.forum;
 
 import com.northgatecode.joinus.mongodb.Forum;
+import com.northgatecode.joinus.mongodb.ForumWatch;
 import com.northgatecode.joinus.mongodb.Topic;
+import com.northgatecode.joinus.mongodb.User;
+import com.northgatecode.joinus.utils.MorphiaHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +21,12 @@ public class TopicListLimited {
     public TopicListLimited() {
     }
 
-    public TopicListLimited(Forum forum, List<Topic> topics, int offset, int limit) {
-        this.forumInfo = new ForumInfo(forum);
+    public TopicListLimited(Forum forum, User user, ForumWatch forumWatch, List<Topic> topics, int offset, int limit) {
+
+        this.forumInfo = new ForumInfo(forum, user);
         this.topicItems = new ArrayList<>();
         for (Topic topic : topics) {
-            this.topicItems.add(new TopicItem(topic));
+            this.topicItems.add(new TopicItem(topic, user, forumWatch));
         }
         this.offset = offset;
         this.limit = limit;

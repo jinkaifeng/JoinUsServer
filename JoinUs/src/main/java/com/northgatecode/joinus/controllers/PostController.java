@@ -64,13 +64,19 @@ public class PostController {
         post.setDeleted(false);
         datastore.save(post);
 
-        for (ObjectId imageId : postAdd.getImageIds()) {
-            PostImage postImage = new PostImage();
-            postImage.setPostId(post.getId());
-            postImage.setImageId(imageId);
-            datastore.save(postImage);
-            score += 2;
+        if (postAdd.getImageIds() != null) {
+            for (ObjectId imageId : postAdd.getImageIds()) {
+                Image image = datastore.find(Image.class).field("id").equal(imageId).get();
+                if (image != null) {
+                    PostImage postImage = new PostImage();
+                    postImage.setPostId(post.getId());
+                    postImage.setImageId(imageId);
+                    datastore.save(postImage);
+                    score += 2;
+                }
+            }
         }
+
 
         // poster
         ForumWatch forumWatch = datastore.find(ForumWatch.class).field("forumId").equal(forum.getId())
