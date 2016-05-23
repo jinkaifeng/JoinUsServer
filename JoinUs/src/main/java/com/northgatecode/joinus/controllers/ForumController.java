@@ -76,7 +76,7 @@ public class ForumController {
 
         Datastore datastore = MorphiaHelper.getDatastore();
         List<ForumWatch> forumWatches = datastore.find(ForumWatch.class).field("userId").equal(userId)
-                .field("deleted").equal(false).order("-lastPostDate").offset(offset).limit(limit).asList();
+                .field("deleted").equal(false).offset(offset).limit(limit).asList();
         List<ObjectId> forumIds = new ArrayList<>();
         for (ForumWatch forumWatch : forumWatches) {
             forumIds.add(forumWatch.getForumId());
@@ -262,13 +262,14 @@ public class ForumController {
         }
         if (limit == 0) limit = 10;
         List<Topic> topics = datastore.createQuery(Topic.class).field("forumId").equal(forum.getId())
-                .field("deleted").equal(false).order("onTop").order("-lastPostDate")
+                .field("deleted").equal(false).order("-onTop, -lastPostDate")
                 .offset(offset).limit(limit).asList();
 
         ForumWatch forumWatch = null;
         if (user != null) {
             forumWatch = MorphiaHelper.getDatastore().find(ForumWatch.class)
-                    .field("forumId").equal(forum.getId()).field("userId").equal(user.getId()).get();
+                    .field("forumId").equal(forum.getId()).field("userId").equal(user.getId())
+                    .get();
         }
 
         return Response.ok(new TopicListLimited(forum, user, forumWatch, topics, offset, limit)).build();
@@ -303,6 +304,7 @@ public class ForumController {
                 forumWatch.setAdmin(false);
             }
             forumWatch.setJoinDate(new Date());
+            forumWatch.setLastPostDate(new Date());
             forumWatch.setDeleted(false);
             datastore.save(forumWatch);
 

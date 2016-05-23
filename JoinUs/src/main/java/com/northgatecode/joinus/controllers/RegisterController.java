@@ -1,8 +1,10 @@
 package com.northgatecode.joinus.controllers;
 
 import com.northgatecode.joinus.dto.*;
+import com.northgatecode.joinus.dto.easemob.AuthToken;
 import com.northgatecode.joinus.dto.user.*;
 import com.northgatecode.joinus.mongodb.User;
+import com.northgatecode.joinus.services.EaseMobService;
 import com.northgatecode.joinus.services.UserService;
 import com.northgatecode.joinus.services.VerifyCodeService;
 import com.northgatecode.joinus.utils.MorphiaHelper;
@@ -101,6 +103,7 @@ public class RegisterController {
 
         datastore.save(user);
 
+        EaseMobService.addUser(user);
 
         return Response.ok(new UserProfileWithToken(new UserProfile(user), new UserToken(user))).build();
     }
@@ -139,8 +142,24 @@ public class RegisterController {
 
         datastore.save(user);
 
+        EaseMobService.addUser(user);
 
         return Response.ok(new UserProfileWithToken(new UserProfile(user), new UserToken(user))).build();
+    }
+
+    @GET
+    @Path("sync")
+    public Response syncEaseMobUser() {
+        Datastore datastore = MorphiaHelper.getDatastore();
+
+        List<User> users = MorphiaHelper.getDatastore().createQuery(User.class)
+                .field("easeMobPassword").equal(null).asList();
+
+        for (User user : users) {
+            EaseMobService.addUser(user);
+        }
+
+        return Response.ok().build();
     }
 
 }

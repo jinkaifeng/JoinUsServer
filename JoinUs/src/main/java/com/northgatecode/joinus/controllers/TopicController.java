@@ -1,6 +1,7 @@
 package com.northgatecode.joinus.controllers;
 
 import com.northgatecode.joinus.auth.Authenticated;
+import com.northgatecode.joinus.auth.TryAuthenticate;
 import com.northgatecode.joinus.auth.UserPrincipal;
 import com.northgatecode.joinus.dto.forum.ForumListLimited;
 import com.northgatecode.joinus.dto.forum.PostListLimited;
@@ -51,6 +52,11 @@ public class TopicController {
                 || topicAdd.getFirstPost().getContent().length() < 3) {
             throw new BadRequestException("内容不能为空且不得少于3个字符");
         }
+
+//        if (topicAdd.getFirstPost().getImageIds() != null
+//                && topicAdd.getFirstPost().getImageIds().size() > 5) {
+//            throw new BadRequestException("每贴发表图片不可以超过5张");
+//        }
 
         Forum forum = datastore.find(Forum.class).field("id").equal(topicAdd.getForumId()).get();
         if (forum == null || forum.isDeleted()) {
@@ -165,6 +171,7 @@ public class TopicController {
 
     @GET
     @Path("{id}/pinTop")
+    @Authenticated
     public Response pinTop(@Context SecurityContext securityContext, @PathParam("id") String topicId) {
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
         ObjectId userId = userPrincipal.getId();
@@ -182,7 +189,7 @@ public class TopicController {
 
         ForumWatch forumWatch = datastore.find(ForumWatch.class).field("forumId").equal(forum.getId())
                 .field("userId").equal(userId).get();
-        if (forumWatch == null || !forumWatch.isAdmin()) {
+        if (forumWatch == null || forumWatch.isDeleted() || !forumWatch.isAdmin()) {
             throw new BadRequestException("您无权进行此操作");
         }
 
@@ -194,6 +201,7 @@ public class TopicController {
 
     @GET
     @Path("{id}/unpinTop")
+    @Authenticated
     public Response unpinTop(@Context SecurityContext securityContext, @PathParam("id") String topicId) {
         UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
         ObjectId userId = userPrincipal.getId();
@@ -211,7 +219,7 @@ public class TopicController {
 
         ForumWatch forumWatch = datastore.find(ForumWatch.class).field("forumId").equal(forum.getId())
                 .field("userId").equal(userId).get();
-        if (forumWatch == null || !forumWatch.isAdmin()) {
+        if (forumWatch == null || forumWatch.isDeleted() || !forumWatch.isAdmin()) {
             throw new BadRequestException("您无权进行此操作");
         }
 
@@ -223,8 +231,16 @@ public class TopicController {
 
     @GET
     @Path("{id}")
-    public Response getTopicAndPosts(@PathParam("id") String topicId, @QueryParam("offset") int offset, @QueryParam("limit") int limit) {
+    @TryAuthenticate
+    public Response getTopicAndPosts(@Context SecurityContext securityContext, @PathParam("id") String topicId, @QueryParam("offset") int offset, @QueryParam("limit") int limit) {
+        UserPrincipal userPrincipal = (UserPrincipal) securityContext.getUserPrincipal();
         Datastore datastore = MorphiaHelper.getDatastore();
+
+        User user = null;
+        if (userPrincipal != null) {
+            user = datastore.find(User.class).field("id").equal(userPrincipal.getId()).get();
+        }
+
         Topic topic = datastore.createQuery(Topic.class).field("id").equal(new ObjectId(topicId)).get();
         if (topic == null || topic.isDeleted()) {
             throw new BadRequestException("无效的主题id或主题已删除");
@@ -235,15 +251,22 @@ public class TopicController {
             throw new BadRequestException("论坛不存在或此论坛已删除");
         }
 
+        ForumWatch forumWatch = null;
+        if (user != null) {
+            forumWatch = MorphiaHelper.getDatastore().find(ForumWatch.class)
+                    .field("forumId").equal(forum.getId()).field("userId").equal(user.getId())
+                    .get();
+        }
+
         if (offset == 0) {
             topic.setViews(topic.getViews() + 1);
             datastore.save(topic);
         }
         if (limit == 0) limit = 10;
-        List<Post> posts = datastore.createQuery(Post.class).field("topicId").equal(topic.getId())
+        List<Post> posts = datastore.find(Post.class).field("topicId").equal(topic.getId())
                 .field("deleted").equal(false).order("postDate").offset(offset).limit(limit).asList();
 
-        return Response.ok(new PostListLimited(topic, posts, offset, limit)).build();
+        return Response.ok(new PostListLimited(topic, user, forumWatch, posts, offset, limit)).build();
     }
 
 }

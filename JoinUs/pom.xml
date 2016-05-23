@@ -63,6 +63,11 @@
             <!--<artifactId>jersey-media-moxy</artifactId>-->
         <!--</dependency>-->
 
+        <!--<dependency>-->
+            <!--<groupId>org.glassfish.jersey.media</groupId>-->
+            <!--<artifactId>jersey-media-json-jackson</artifactId>-->
+        <!--</dependency>-->
+
         <!-- Hibernate -->
         <!--<dependency>-->
             <!--<groupId>org.hibernate</groupId>-->

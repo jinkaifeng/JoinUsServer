@@ -14,7 +14,7 @@ import java.util.List;
 @Entity(noClassnameStored = true)
 @Indexes({
         @Index(fields = @Field(value = "forumId")),
-        @Index(fields = @Field(value = "onTop")),
+        @Index(fields = @Field(value = "onTop", type = IndexType.DESC)),
         @Index(fields = @Field(value = "lastPostDate", type = IndexType.DESC)),
 })
 public class Topic {

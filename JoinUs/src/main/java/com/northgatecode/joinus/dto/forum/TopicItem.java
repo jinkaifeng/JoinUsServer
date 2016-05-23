@@ -43,16 +43,10 @@ public class TopicItem {
 
             if (this.postedBy.getUserId().equals(user.getId())) {
                 this.deleteable = true;
-            }
-
-            if (user.getRoleId() >= 100) {
+            } else if (user.getRoleId() >= 100) {
                 this.deleteable = true;
-            }
-
-            if (forumWatch != null && !forumWatch.isDeleted()) {
-                if (forumWatch.isAdmin()) {
-                    this.deleteable = true;
-                }
+            } else if (forumWatch != null && !forumWatch.isDeleted() && forumWatch.isAdmin()) {
+                this.deleteable = true;
             }
         }
     }
@@ -135,5 +129,13 @@ public class TopicItem {
 
     public void setOnTop(boolean onTop) {
         this.onTop = onTop;
+    }
+
+    public boolean isDeleteable() {
+        return deleteable;
+    }
+
+    public void setDeleteable(boolean deleteable) {
+        this.deleteable = deleteable;
     }
 }

@@ -28,6 +28,7 @@ public class User {
     private ObjectId photoImageId;
     private int genderId;
     private int cityId;
+    private String easeMobPassword;
     private boolean locked;
     private Date lastUpdateDate;
     private Date registerDate;
@@ -127,6 +128,14 @@ public class User {
 
     public void setCityId(int cityId) {
         this.cityId = cityId;
+    }
+
+    public String getEaseMobPassword() {
+        return easeMobPassword;
+    }
+
+    public void setEaseMobPassword(String easeMobPassword) {
+        this.easeMobPassword = easeMobPassword;
     }
 
     public boolean isLocked() {

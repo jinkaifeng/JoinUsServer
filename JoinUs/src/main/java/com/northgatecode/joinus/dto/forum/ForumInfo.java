@@ -29,10 +29,10 @@ public class ForumInfo {
     }
 
     public ForumInfo(Forum forum) {
-        this(forum, null);
+        this(forum, null, null);
     }
 
-    public ForumInfo(Forum forum, User user) {
+    public ForumInfo(Forum forum, User user, ForumWatch forumWatch) {
         this.id = forum.getId();
         this.name = forum.getName();
         this.desc = forum.getDesc();
@@ -49,10 +49,12 @@ public class ForumInfo {
 
             if (this.createdBy.getUserId().equals(user.getId())) {
                 this.deleteable = true;
+            } else if (user.getRoleId() >= 100) {
+                this.deleteable = true;
             }
 
-            if (user.getRoleId() >= 100) {
-                this.deleteable = true;
+            if (forumWatch != null && !forumWatch.isDeleted()) {
+                this.watchedByMe = new ForumUserInfo(user, forumWatch);
             }
         }
     }

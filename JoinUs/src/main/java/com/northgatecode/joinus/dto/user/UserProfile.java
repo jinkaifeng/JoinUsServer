@@ -25,6 +25,7 @@ public class UserProfile {
     private Gender gender;
     private Role role;
     private CityInfo city;
+    private String easeMobPassword;
     private Date lastUpdateDate;
     private Date registerDate;
 
@@ -49,6 +50,7 @@ public class UserProfile {
         if (user.getRoleId() != 0) {
             this.role = datastore.find(Role.class).field("id").equal(user.getRoleId()).get();
         }
+        this.easeMobPassword = user.getEaseMobPassword();
         this.lastUpdateDate = user.getLastUpdateDate();
         this.registerDate = user.getRegisterDate();
     }
@@ -119,6 +121,14 @@ public class UserProfile {
 
     public CityInfo getCity() {
         return city;
+    }
+
+    public String getEaseMobPassword() {
+        return easeMobPassword;
+    }
+
+    public void setEaseMobPassword(String easeMobPassword) {
+        this.easeMobPassword = easeMobPassword;
     }
 
     public void setCity(CityInfo city) {

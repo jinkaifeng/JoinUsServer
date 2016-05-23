@@ -1,8 +1,6 @@
 package com.northgatecode.joinus.dto.forum;
 
-import com.northgatecode.joinus.mongodb.Forum;
-import com.northgatecode.joinus.mongodb.Post;
-import com.northgatecode.joinus.mongodb.Topic;
+import com.northgatecode.joinus.mongodb.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +14,11 @@ public class PostListLimited {
     private int offset;
     private int limit;
 
-    public PostListLimited(Topic topic, List<Post> posts, int offset, int limit) {
-        this.topicInfo = new TopicInfo(topic);
+    public PostListLimited(Topic topic, User user, ForumWatch forumWatch, List<Post> posts, int offset, int limit) {
+        this.topicInfo = new TopicInfo(topic, user, forumWatch);
         this.postItems = new ArrayList<>();
         for (Post post : posts) {
-            this.postItems.add(new PostItem(post));
+            this.postItems.add(new PostItem(post, user, forumWatch));
         }
         this.offset = offset;
         this.limit = limit;

@@ -1,17 +1,24 @@
 package com.northgatecode.joinus.services;
 
 import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.model.OSSObject;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.northgatecode.joinus.auth.UserPrincipal;
+import com.northgatecode.joinus.dto.ImageInfo;
 import com.northgatecode.joinus.mongodb.Image;
+import com.northgatecode.joinus.utils.Config;
+import com.northgatecode.joinus.utils.JerseyHelper;
 import com.northgatecode.joinus.utils.MorphiaHelper;
 import com.northgatecode.joinus.utils.Utils;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 
 import javax.imageio.ImageIO;
+import javax.ws.rs.InternalServerErrorException;
+import javax.ws.rs.core.Response;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +26,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by qianliang on 5/4/2016.
@@ -38,11 +47,15 @@ public class ImageService {
     }
 
     public static Image saveUploadImage(InputStream inputStream, ObjectId userId) {
+        Logger logger = Logger.getLogger(EaseMobService.class.getName());
 
-//        String endpoint = "oss-cn-hangzhou-internal.aliyuncs.com";
-        String endpoint = "oss-cn-hangzhou.aliyuncs.com";
-        String accessKeyId = "eywsz9DiS6fROsIz";
-        String accessKeySecret = "D0wGu17rlRdXF0oTewPRpIW1WnHqRE";
+        String endpoint;
+        if (SystemUtils.IS_OS_LINUX) {
+            endpoint = "oss-cn-hangzhou-internal.aliyuncs.com";
+        } else {
+            endpoint = "oss-cn-hangzhou.aliyuncs.com";
+        }
+
 
         String imageName = UUID.randomUUID().toString();
 
@@ -54,7 +67,7 @@ public class ImageService {
 
         OSSClient client = null;
         try {
-            client = new OSSClient(endpoint, accessKeyId, accessKeySecret);
+            client = new OSSClient(endpoint, Config.getAliKey(), Config.getAliSecret());
             client.putObject("northgatecode", key, inputStream, meta);
         } finally {
             if (client != null) {
@@ -62,14 +75,27 @@ public class ImageService {
             }
         }
 
-        Image image = new Image();
-        image.setName(imageName);
-        image.setExtension(".jpg");
-        image.setUploadedBy(userId);
-        image.setUploadDate(new Date());
-        MorphiaHelper.getDatastore().save(image);
+        Response response = JerseyHelper.getClient()
+                .target("http://northgatecode.img-cn-hangzhou.aliyuncs.com/joinus/" + imageName + ".jpg@info")
+                .request().get();
+        if (response.getStatus() == 200) {
+            ImageInfo imageInfo = response.readEntity(ImageInfo.class);
 
-        return image;
+            Image image = new Image();
+            image.setName(imageName);
+            image.setExtension(".jpg");
+            image.setWidth(imageInfo.getWidth());
+            image.setHeight(imageInfo.getHeight());
+            image.setSize(imageInfo.getSize());
+            image.setUploadedBy(userId);
+            image.setUploadDate(new Date());
+            MorphiaHelper.getDatastore().save(image);
+
+            return image;
+        } else {
+            throw new InternalServerErrorException("图片上传失败");
+        }
+
     }
 
 //

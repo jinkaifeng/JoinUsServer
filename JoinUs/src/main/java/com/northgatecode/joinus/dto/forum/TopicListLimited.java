@@ -23,7 +23,7 @@ public class TopicListLimited {
 
     public TopicListLimited(Forum forum, User user, ForumWatch forumWatch, List<Topic> topics, int offset, int limit) {
 
-        this.forumInfo = new ForumInfo(forum, user);
+        this.forumInfo = new ForumInfo(forum, user, forumWatch);
         this.topicItems = new ArrayList<>();
         for (Topic topic : topics) {
             this.topicItems.add(new TopicItem(topic, user, forumWatch));

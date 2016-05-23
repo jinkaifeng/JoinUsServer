@@ -1,6 +1,8 @@
 package com.northgatecode.joinus.dto.forum;
 
+import com.northgatecode.joinus.mongodb.ForumWatch;
 import com.northgatecode.joinus.mongodb.Topic;
+import com.northgatecode.joinus.mongodb.User;
 import org.bson.types.ObjectId;
 
 /**
@@ -12,16 +14,28 @@ public class TopicInfo {
     private ForumUserInfo postedBy;
     private int posts;
     private int views;
+    private boolean deleteable;
 
     public TopicInfo() {
     }
 
-    public TopicInfo(Topic topic) {
+    public TopicInfo(Topic topic, User user, ForumWatch forumWatch) {
         this.id = topic.getId();
         this.title = topic.getTitle();
         this.postedBy = new ForumUserInfo(topic.getPostedByUserId(), topic.getForumId());
         this.views = topic.getViews();
         this.posts = topic.getPosts();
+
+        if (user != null) {
+
+            if (this.postedBy.getUserId().equals(user.getId())) {
+                this.deleteable = true;
+            } else if (user.getRoleId() >= 100) {
+                this.deleteable = true;
+            } else if (forumWatch != null && !forumWatch.isDeleted() && forumWatch.isAdmin()) {
+                this.deleteable = true;
+            }
+        }
     }
 
     public ObjectId getId() {
@@ -62,5 +76,13 @@ public class TopicInfo {
 
     public void setViews(int views) {
         this.views = views;
+    }
+
+    public boolean isDeleteable() {
+        return deleteable;
+    }
+
+    public void setDeleteable(boolean deleteable) {
+        this.deleteable = deleteable;
     }
 }

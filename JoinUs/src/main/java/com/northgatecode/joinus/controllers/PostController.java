@@ -141,12 +141,26 @@ public class PostController {
             throw new BadRequestException("帖子不存在或已被删除");
         }
 
-        if (post.getPostedByUserId() != userId && user.getRoleId() < 100) {
-            throw new BadRequestException("您无权删除此贴");
+        Topic topic = datastore.find(Topic.class).field("id").equal(post.getTopicId()).get();
+        if (topic == null || topic.isDeleted()) {
+            throw new BadRequestException("主题不存在或已被删除");
         }
 
-        post.setDeleted(true);
-        datastore.save(post);
+        Forum forum = datastore.find(Forum.class).field("id").equal(topic.getForumId()).get();
+        if (forum == null || forum.isDeleted()) {
+            throw new BadRequestException("论坛不存在或此论坛已删除");
+        }
+
+        ForumWatch forumWatch = datastore.find(ForumWatch.class)
+                .field("forumId").equal(forum.getId()).field("userId").equal(userId).get();
+
+        if (post.getPostedByUserId().equals(userId) || user.getRoleId() >= 100
+                || forumWatch.isAdmin()) {
+            post.setDeleted(true);
+            datastore.save(post);
+        } else {
+            throw new BadRequestException("您无权删除此主题");
+        }
 
         return Response.ok().build();
     }

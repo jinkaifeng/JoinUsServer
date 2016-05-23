@@ -17,6 +17,9 @@ public class Image {
     private ObjectId id;
     private String name;
     private String extension;
+    private int width;
+    private int height;
+    private int size;
     private ObjectId uploadedBy;
     private Date uploadDate;
 
@@ -42,6 +45,30 @@ public class Image {
 
     public void setExtension(String extension) {
         this.extension = extension;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 
     public ObjectId getUploadedBy() {
